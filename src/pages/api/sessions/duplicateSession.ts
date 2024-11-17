@@ -11,8 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: 'Необходимо указать имя текущего файла и новое имя' });
         }
 
-        const originalFilePath = path.resolve('src', 'sessions', originalFileName);
-        const newFilePath = path.resolve('src', 'sessions', duplicateFileName + '.json');
+        const originalFilePath = path.resolve('resources', 'sessions', originalFileName);
+        const newFilePath = path.resolve('resources', 'sessions', duplicateFileName + '.json');
 
         console.log('Пытаемся читать файл сессии из:', originalFilePath);
         console.log('Пытаемся сохранить новый файл сессии в:', newFilePath);
@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(200).json({ message: 'Сессия успешно дублирована' });
         } catch (error) {
             console.error('Ошибка при дублировании сессии:', error);
-            return res.status(500).json({ error: 'Ошибка при сохранении дубликата', details: error.message });
+            return res.status(500).json({ error: 'Ошибка при сохранении дубликата', details: error });
         }
     } else {
         return res.status(405).json({ error: 'Метод не разрешен' });

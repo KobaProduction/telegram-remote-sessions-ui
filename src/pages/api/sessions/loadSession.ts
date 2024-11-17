@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: 'Не указан файл' });
         }
 
-        const filePath = path.join(process.cwd(), 'src/sessions', `${fileName}`);
+        const filePath = path.join(process.cwd(), 'resources/sessions', `${fileName}`);
 
         console.log("Пытаюсь прочитать файл", filePath); // Логируем путь к файлу
 

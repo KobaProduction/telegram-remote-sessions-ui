@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(400).json({ error: 'Неверные данные' });
             }
 
-            const sessionsDir = path.join(process.cwd(), 'src', 'sessions');
+            const sessionsDir = path.join(process.cwd(), 'resources', 'sessions');
             console.log('Папка с сессиями:', sessionsDir);
 
             if (!fs.existsSync(sessionsDir)) {
