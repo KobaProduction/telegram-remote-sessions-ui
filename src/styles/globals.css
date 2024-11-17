@@ -100,9 +100,24 @@
   color: white;
 }
 
+.modal-save-button {
+  margin-top: 1rem;
+  margin-right: 1rem ;
+}
+
 .duplicate-button {
   background-color: #2196F3;
   color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.duplicate-button:disabled {
+  background-color: #B0BEC5; /* Серый фон */
+  color: #CFD8DC; /* Светло-серый текст */
+  cursor: not-allowed; /* Курсор в виде руки, когда кнопка отключена */
 }
 
 .delete-button {
