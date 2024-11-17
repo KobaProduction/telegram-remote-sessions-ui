@@ -23,7 +23,8 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
                 const res = await fetch(`/api/sessions/loadSession?fileName=${sessionFile.name}`);
 
                 if (!res.ok) {
-                    throw new Error(`Ошибка при загрузке: ${res.statusText}`);
+                    setError(`Ошибка при загрузке: ${res.statusText}`);
+                    return
                 }
 
                 const data = await res.json();
