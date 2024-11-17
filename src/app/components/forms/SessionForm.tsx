@@ -97,8 +97,8 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
 
     const handleFieldChange = async (key: string, value: any) => {
         setSessionDataState({ ...sessionData, [key]: value });
-        setValue(key, value, { shouldValidate: true }); // Мгновенная валидация
-        await trigger(key); // Немедленная валидация для конкретного поля
+        setValue(key, value, { shouldValidate: true });
+        await trigger(key);
     };
 
     const handleDuplicateSession = async () => {
