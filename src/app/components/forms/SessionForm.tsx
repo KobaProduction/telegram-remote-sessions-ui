@@ -103,7 +103,7 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
 
     const handleDuplicateSession = async () => {
         if (!sessionFile || !sessionData || !duplicateName) {
-            setError('Необходимо указать все данные: файл и новое имя для дубликата');
+            setError('Необходимо указать новое имя для дубликата');
             return;
         }
 
