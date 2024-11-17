@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const sessionData = JSON.parse(fileData);
 
             res.status(200).json({ sessionData });
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
             res.status(500).json({ error: 'Ошибка при загрузке данных сессии' });
         }
