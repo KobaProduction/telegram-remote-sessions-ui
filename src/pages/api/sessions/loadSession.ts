@@ -1,5 +1,3 @@
-// pages/api/sessions/loadSession.ts
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
 import fs from 'fs';
