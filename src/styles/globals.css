@@ -156,3 +156,9 @@
   background-color: #f44336;
   color: white;
 }
+
+.error {
+  color: red;
+  font-size: 15px;
+  margin-top: 5px;
+}
