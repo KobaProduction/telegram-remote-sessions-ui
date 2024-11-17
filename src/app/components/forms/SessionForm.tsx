@@ -1,9 +1,20 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { FieldError, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface SessionFormProps {
     sessionFile: File | null;
     setSessionData: React.Dispatch<React.SetStateAction<any>>;
 }
+
+const sessionSchema = z.object({
+    name: z.string().min(1, "Имя не может быть пустым"), // Проверка на непустое значение
+    apiId: z.string().min(10, "API ID должно содержать минимум 10 символов"),
+    apiToken: z.string().min(10, "API Token должен содержать минимум 10 символов"),
+    proxy: z.string().url("Некорректный URL для прокси"),
+    deviceId: z.string().min(1, "ID устройства не может быть пустым"),
+});
 
 const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
     const [loading, setLoading] = useState(false);
@@ -11,6 +22,17 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
     const [sessionData, setSessionDataState] = useState<any>(null);
     const [duplicateName, setDuplicateName] = useState<string | null>(null);
     const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors , isValid},
+        setValue,
+        trigger,
+    } = useForm({
+        resolver: zodResolver(sessionSchema),
+        mode: "onChange"
+    });
 
     useEffect(() => {
         if (!sessionFile) return;
@@ -24,12 +46,15 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
 
                 if (!res.ok) {
                     setError(`Ошибка при загрузке: ${res.statusText}`);
-                    return
+                    return;
                 }
 
                 const data = await res.json();
                 setSessionDataState(data.sessionData);
                 setSessionData(data.sessionData);
+                Object.keys(data.sessionData).forEach((key) => {
+                    setValue(key, data.sessionData[key]);
+                });
             } catch (err: unknown) {
                 setError('Ошибка загрузки данных сессии');
                 console.error('Ошибка загрузки данных сессии:', err);
@@ -46,26 +71,34 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
 
         setLoading(true);
 
-        const res = await fetch(`/api/sessions/saveSession`, {
-            method: "POST",
-            body: JSON.stringify({ fileName: sessionFile.name, sessionData }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        try {
+            const res = await fetch(`/api/sessions/saveSession`, {
+                method: "POST",
+                body: JSON.stringify({ fileName: sessionFile.name, sessionData }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-        if (res.ok) {
-            alert('Сессия успешно сохранена!');
-        } else {
+            if (res.ok) {
+                alert('Сессия успешно сохранена!');
+            } else {
+                const errorData = await res.json();
+                setError(errorData.error || 'Ошибка при сохранении сессии');
+                console.error('Ошибка при сохранении сессии:', errorData);
+            }
+        } catch (err) {
             setError('Ошибка при сохранении сессии');
-            console.error('Ошибка при сохранении сессии:', await res.json());
+            console.error('Ошибка при сохранении сессии:', err);
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
-    const handleFieldChange = (key: string, value: any) => {
+    const handleFieldChange = async (key: string, value: any) => {
         setSessionDataState({ ...sessionData, [key]: value });
+        setValue(key, value, { shouldValidate: true }); // Мгновенная валидация
+        await trigger(key); // Немедленная валидация для конкретного поля
     };
 
     const handleDuplicateSession = async () => {
@@ -76,35 +109,33 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
 
         setLoading(true);
 
-        const res = await fetch(`/api/sessions/duplicateSession`, {
-            method: "POST",
-            body: JSON.stringify({
-                originalFileName: sessionFile.name,
-                duplicateFileName: duplicateName,
-                sessionData,
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        try {
+            const res = await fetch(`/api/sessions/duplicateSession`, {
+                method: "POST",
+                body: JSON.stringify({
+                    originalFileName: sessionFile.name,
+                    duplicateFileName: duplicateName,
+                    sessionData,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-        // Логируем тело запроса перед отправкой
-        console.log('Отправляем запрос на дублирование сессии:', {
-            originalFileName: sessionFile.name,
-            duplicateFileName: duplicateName,
-            sessionData,
-        });
-
-        if (res.ok) {
-            alert('Сессия успешно дублирована!');
-            setShowDuplicateModal(false);
-        } else {
-            const errorData = await res.json();
-            setError(errorData.error || 'Ошибка при дублировании сессии');
-            console.error('Ошибка при дублировании сессии:', errorData);
+            if (res.ok) {
+                alert('Сессия успешно дублирована!');
+                setShowDuplicateModal(false);
+            } else {
+                const errorData = await res.json();
+                setError(errorData.error || 'Ошибка при дублировании сессии');
+                console.error('Ошибка при дублировании сессии:', errorData);
+            }
+        } catch (err) {
+            setError('Ошибка при дублировании сессии');
+            console.error('Ошибка при дублировании сессии:', err);
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const handleDeleteSession = async () => {
@@ -112,45 +143,54 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
 
         setLoading(true);
 
-        const res = await fetch(`/api/sessions/deleteSession`, {
-            method: "DELETE",
-            body: JSON.stringify({
-                fileName: sessionFile.name,
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        try {
+            const res = await fetch(`/api/sessions/deleteSession`, {
+                method: "DELETE",
+                body: JSON.stringify({
+                    fileName: sessionFile.name,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-        if (res.ok) {
-            alert('Сессия успешно удалена!');
-            setSessionData(null);
-            setDuplicateName(null);
-        } else {
+            if (res.ok) {
+                alert('Сессия успешно удалена!');
+                setSessionData(null);
+                setDuplicateName(null);
+            } else {
+                const errorData = await res.json();
+                setError(errorData.error || 'Ошибка при удалении сессии');
+                console.error('Ошибка при удалении сессии:', errorData);
+            }
+        } catch (err) {
             setError('Ошибка при удалении сессии');
-            console.error('Ошибка при удалении сессии:', await res.json());
+            console.error('Ошибка при удалении сессии:', err);
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
-    const handleCheckboxChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    const handleCheckboxChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const { checked } = e.target;
-        setSessionDataState((prevState:any) => ({
+        setSessionDataState((prevState: any) => ({
             ...prevState,
-            isActive: checked
+            isActive: checked,
         }));
-    }
+        setValue("isActive", checked, { shouldValidate: true });
+        await trigger("isActive");
+    };
 
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>{error}</div>;
 
     return (
         <div className="form-container">
-            {/* Выбор файла сессии */}
             {!sessionFile ? (
                 <div className="file-selection">
-                    <label htmlFor="sessionFile" className="upload-label">Выберите файл сессии</label>
+                    <label htmlFor="sessionFile" className="upload-label">
+                        Выберите файл сессии
+                    </label>
                     <input
                         type="file"
                         id="sessionFile"
@@ -167,24 +207,29 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
                 </div>
             )}
 
-            {/* Редактирование данных сессии */}
             {sessionData && (
-                <form className="session-form">
+                <form className="session-form" onSubmit={handleSubmit(handleSaveChanges)}>
                     {Object.keys(sessionData).map((key) => {
                         if (key !== 'isActive') {
                             return (
                                 <div className="form-group" key={key}>
-                                    <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                                    <label htmlFor={key}>
+                                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    </label>
                                     <input
                                         type="text"
                                         id={key}
-                                        name={key}
-                                        value={sessionData[key] || ""}
-                                        onChange={(e) => handleFieldChange(key, e.target.value)}
+                                        {...register(key)}
                                         className="input-field"
+                                        onChange={(e) => handleFieldChange(key, e.target.value)}
                                     />
+                                    {errors[key] && (
+                                        <div className="error">
+                                            {(errors[key] as FieldError)?.message}
+                                        </div>
+                                    )}
                                 </div>
-                            )
+                            );
                         }
                         return null;
                     })}
@@ -205,7 +250,7 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
             )}
 
             <div className="action-buttons">
-                <button onClick={handleSaveChanges} className="button save-button">
+                <button onClick={handleSaveChanges} className="button save-button" disabled={!isValid}>
                     Сохранить изменения
                 </button>
 
