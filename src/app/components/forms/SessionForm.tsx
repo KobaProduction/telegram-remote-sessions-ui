@@ -250,7 +250,11 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
             )}
 
             <div className="action-buttons">
-                <button onClick={handleSaveChanges} className="button save-button" disabled={!isValid}>
+                <button
+                    onClick={handleSaveChanges}
+                    className="button save-button"
+                    disabled={!isValid}
+                >
                     Сохранить изменения
                 </button>
 
