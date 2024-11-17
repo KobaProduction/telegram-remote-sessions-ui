@@ -12,6 +12,7 @@
 
 .idea
 
+resources
 # testing
 /coverage
 
