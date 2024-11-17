@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import SessionForm from '@/app/components/forms/SessionForm';
 
 const Home = () => {

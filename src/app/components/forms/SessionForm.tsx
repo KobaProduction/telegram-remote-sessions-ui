@@ -44,10 +44,7 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
             try {
                 const res = await fetch(`/api/sessions/loadSession?fileName=${sessionFile.name}`);
 
-                if (!res.ok) {
-                    setError(`Ошибка при загрузке: ${res.statusText}`);
-                    return;
-                }
+                if (!res.ok) return setError(`Ошибка при загрузке: ${res.statusText}`);
 
                 const data = await res.json();
                 setSessionDataState(data.sessionData);
@@ -55,7 +52,7 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
                 Object.keys(data.sessionData).forEach((key) => {
                     setValue(key, data.sessionData[key]);
                 });
-            } catch (err: unknown) {
+            } catch (err) {
                 setError('Ошибка загрузки данных сессии');
                 console.error('Ошибка загрузки данных сессии:', err);
             } finally {
