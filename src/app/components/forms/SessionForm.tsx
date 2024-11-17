@@ -170,19 +170,37 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
             {/* Редактирование данных сессии */}
             {sessionData && (
                 <form className="session-form">
-                    {Object.keys(sessionData).map((key) => (
-                        <div className="form-group" key={key}>
-                            <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                    {Object.keys(sessionData).map((key) => {
+                        if (key !== 'isActive') {
+                            return (
+                                <div className="form-group" key={key}>
+                                    <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                                    <input
+                                        type="text"
+                                        id={key}
+                                        name={key}
+                                        value={sessionData[key] || ""}
+                                        onChange={(e) => handleFieldChange(key, e.target.value)}
+                                        className="input-field"
+                                    />
+                                </div>
+                            )
+                        }
+                        return null;
+                    })}
+                    <div className="form-group">
+                        <div className="checkbox-group">
+                            <label htmlFor="isActive">Включить Сессию</label>
                             <input
-                                type="text"
-                                id={key}
-                                name={key}
-                                value={sessionData[key] || ""}
-                                onChange={(e) => handleFieldChange(key, e.target.value)}
-                                className="input-field"
+                                type="checkbox"
+                                id="isActive"
+                                name="isActive"
+                                checked={sessionData.isActive ?? false}
+                                onChange={handleCheckboxChange}
+                                className="checkbox-field"
                             />
                         </div>
-                    ))}
+                    </div>
                 </form>
             )}
 
