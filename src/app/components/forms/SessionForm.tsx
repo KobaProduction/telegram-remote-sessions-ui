@@ -134,6 +134,14 @@ const SessionForm = ({ sessionFile, setSessionData }: SessionFormProps) => {
         setLoading(false);
     };
 
+    const handleCheckboxChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+        const { checked } = e.target;
+        setSessionDataState((prevState:any) => ({
+            ...prevState,
+            isActive: checked
+        }));
+    }
+
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>{error}</div>;
 
