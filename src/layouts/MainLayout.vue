@@ -40,14 +40,15 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import {useQuasar} from 'quasar'
+import {ref} from 'vue';
+import EssentialLink, {type EssentialLinkProps} from 'components/EssentialLink.vue';
 
 const $q = useQuasar();
 
@@ -99,7 +100,7 @@ const linksList: EssentialLinkProps[] = [
 
 const leftDrawerOpen = ref(false);
 
-function toggleLeftDrawer () {
+function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 </script>
