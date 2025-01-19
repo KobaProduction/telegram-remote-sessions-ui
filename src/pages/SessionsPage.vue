@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getSessions } from 'src/services/sessionsService';
+import { api } from 'src/services/trsApiInstance';
 import SessionList from 'components/SessionList.vue';
 import CreateSessionButton from 'components/button/CreateSessionButton.vue';
+import type { Session, SessionsResponse } from 'src/services/trsApiTypes';
 
-const sessions = ref([]);
+const sessions = ref<Session[]>([]);
 const currentPage = ref(1);
-// const connectedServerAPI = ref(null);
 const totalSessions = ref(0);
-const sessionsPerPage = 5; // Количество сессий на странице
+const sessionsPerPage = 5;
 
+// Функция для получения сессий с сервера
 const fetchSessions = async () => {
   try {
-    const data = await getSessions(currentPage.value, sessionsPerPage);
+    const data = await api.getSessions(currentPage.value, sessionsPerPage) as SessionsResponse;
     sessions.value = data.sessions;
     totalSessions.value = data.total;
   } catch (error) {
@@ -20,26 +21,27 @@ const fetchSessions = async () => {
   }
 };
 
-// const onConnect = async () =>{
-//   // получаем последний url сервера
-//   const serverAPI = new TRSAPI("http://localhost:5000");
-//   const status = await serverAPI.getStatus()
-//   if (status) {
-//     rou
-//   }
-// }
+// Загружаем сессии при монтировании
 onMounted(() => {
   fetchSessions();
 });
+
+// Обработчик для обновления списка сессий после создания новой
+const handleSessionCreated = () => {
+  fetchSessions();
+};
 </script>
 
 <template>
   <div class="column">
-    <!-- Вставляем компонент кнопки создания сессии -->
-    <CreateSessionButton />
+    <CreateSessionButton @sessionCreated="handleSessionCreated" />
 
     <div v-if="sessions.length" class="col self-center">
-      <SessionList :sessions="sessions" :totalSessions="totalSessions" :currentPage="currentPage" />
+      <SessionList
+        :sessions="sessions"
+        :totalSessions="totalSessions"
+        :currentPage="currentPage"
+      />
     </div>
 
     <div v-else>
@@ -56,7 +58,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-<style>
-
-</style>
