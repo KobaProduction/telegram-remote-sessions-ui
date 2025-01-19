@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getSessions } from 'src/services/sessionsService';
+import { api } from 'src/services/trsApiInstance'; // Подключаем экземпляр api
 import ManageSession from 'components/ManageSession.vue';
 
-// Стейт для сессий
+// Стейт для сессий (массив строк)
 const sessions = ref<string[]>([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
@@ -13,17 +13,23 @@ const isDialogOpen = ref(false); // Переменная для отображе
 // Получаем сессии с сервера
 const fetchSessions = async () => {
   try {
-    const response = await getSessions();
-    sessions.value = response.sessions;
-    totalPages.value = Math.ceil(response.sessions.length / 5);
+    const response = await api.getSessions(currentPage.value);
+
+    // Проверяем, массив ли это строк, чтобы избежать ошибок
+    if (Array.isArray(response.sessions) && response.sessions.every(s => typeof s === 'string')) {
+      sessions.value = response.sessions;
+      totalPages.value = Math.ceil(response.sessions.length / 5);
+    } else {
+      console.error('Ошибка: ожидается массив строк, но получено:', response.sessions);
+    }
   } catch (error) {
     console.error('Ошибка при загрузке списка сессий:', error);
   }
 };
 
 // Открыть управление сессией
-const openSession = (sessionName: string) => {
-  selectedSession.value = sessionName;
+const openSession = (session: string) => {
+  selectedSession.value = session;
   isDialogOpen.value = true;
 };
 
@@ -59,13 +65,13 @@ onMounted(() => {
       v-model="currentPage"
       :max="totalPages"
       class="q-mt-md flex justify-center"
-      direction-links/>
+      direction-links
+    />
   </div>
 
-    <q-dialog v-model="isDialogOpen">
-      <ManageSession v-if="selectedSession" :sessionName="selectedSession" @close="closeSession" />
-    </q-dialog>
-
+  <q-dialog v-model="isDialogOpen">
+    <ManageSession v-if="selectedSession" :sessionName="selectedSession" @close="closeSession" />
+  </q-dialog>
 </template>
 
 <style scoped>
