@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { TRSAPI } from 'src/services/trsAPI'
+import { api } from 'src/services/trsApiInstance'
 
 const serverStatus = ref<'checking' | 'online' | 'offline'>('checking')
 const serverErrorMessage = ref('')
-const api = new TRSAPI('http://localhost:9000')
 const router = useRouter()
 
 
