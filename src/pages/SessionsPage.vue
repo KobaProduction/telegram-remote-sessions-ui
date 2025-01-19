@@ -57,8 +57,6 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-.q-mt-md {
-  margin-top: 20px;
-}
+<style>
+
 </style>
