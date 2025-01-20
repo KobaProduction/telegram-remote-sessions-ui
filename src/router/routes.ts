@@ -10,17 +10,6 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-
-  {
-    path: '/connect',
-    component: () => import('pages/ConnectPage.vue') ,
-    children: [{ path: '', component: () => import('pages/ConnectPage.vue') }]
-    },
-  {
-    path: '/sessions',
-    component: () => import('pages/SessionsPage.vue') ,
-    children: [{ path: '', component: () => import('pages/SessionsPage.vue') }]
-  },
 ];
 
 export default routes;
