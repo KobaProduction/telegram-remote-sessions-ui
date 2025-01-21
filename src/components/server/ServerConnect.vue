@@ -13,6 +13,7 @@ const props = defineProps<{
 const checkServer = async () => {
   try {
     const status = await props.api.getStatus()
+    console.log(status)
     if (status) {
       serverStatus.value = 'online'
       serverErrorMessage.value = ''

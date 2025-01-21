@@ -2,10 +2,10 @@
 import { ref, defineEmits } from 'vue';
 
 const serverURL = ref('');
-const emit = defineEmits(['connect']);
+const emit = defineEmits(['onConnect']);
 
 const connect = () => {
-  emit('connect', serverURL.value);
+  emit('onConnect', serverURL.value);
 };
 </script>
 
