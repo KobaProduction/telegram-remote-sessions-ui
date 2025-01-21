@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { api } from 'src/services/trsApiInstance';
-import { useQuasar } from 'quasar';
-import type { ApiResponse } from 'src/services/trsApiTypes';
+import type { TrsApi } from 'src/services/trs/api'
+
+const props = defineProps<{
+  api: TrsApi;
+}>();
 
 const name = ref('test');
 const appVersion = ref('test');
@@ -14,22 +16,14 @@ const systemLangCode = ref('test');
 const apiId = ref(1);
 const apiHash = ref('test');
 
-
 const isDialogOpen = ref(false);
-
-
-const $q = useQuasar();
 
 
 const router = useRouter();
 
-
-
-
 const openDialog = () => {
   isDialogOpen.value = true;
 };
-
 
 const closeDialog = () => {
   isDialogOpen.value = false;
@@ -38,9 +32,8 @@ const closeDialog = () => {
 
 const createNewSession = async () => {
   try {
-
-    const response = await api.createSession({
-      name: name.value,
+    console.log('Отправляем запрос на создание сессии...');
+    const result = await props.api.createSession(name.value, {
       app_version: appVersion.value,
       lang_code: langCode.value,
       device_model: deviceModel.value,
@@ -48,50 +41,28 @@ const createNewSession = async () => {
       system_lang_code: systemLangCode.value,
       api_id: apiId.value,
       api_hash: apiHash.value,
-    }) as ApiResponse; // Приводим response к типу ApiResponse
+    });
 
-    // Проверка на успешность создания сессии
-    if (response.status === 'success') {
-      $q.notify({
-        color: 'positive',
-        message: 'Сессия успешно создана!',
-        position: 'top',
-      });
+    console.log('Ответ от сервера:', result);
+    if (result.status) {
+      console.log('Сессия успешно создана!');
+
       closeDialog();
-
-
       await router.push('/sessions');
-    } else {
+    } else if (result.message.includes('Session already exist')) {
+      console.log('Ошибка: Сессия уже существует');
 
-      $q.notify({
-        color: 'negative',
-        message: `Ошибка: ${response.message || 'Неизвестная ошибка'}`,
-        position: 'top',
-      });
-    }
-  } catch (error: unknown) {
-
-    if (error instanceof Error) {
-      $q.notify({
-        color: 'negative',
-        message: `Ошибка при создании сессии: ${error.message}`,
-        position: 'top',
-      });
     } else {
-      $q.notify({
-        color: 'negative',
-        message: 'Неизвестная ошибка при создании сессии.',
-        position: 'top',
-      });
+      console.log('Ошибка от сервера:', result.message);
     }
+  } catch (error) {
+    console.error('Ошибка при создании сессии:', error)
   }
-};
-
+}
 </script>
 
 <template>
   <div class="col self-center q-pa-md">
-
     <q-btn
       @click="openDialog"
       color="primary"
@@ -99,12 +70,10 @@ const createNewSession = async () => {
       class="q-mt-md"
     />
 
-    <!-- Модальное окно для ввода данных сессии -->
     <q-dialog v-model="isDialogOpen">
       <q-card>
         <q-card-section>
           <h6>Создать новую сессию</h6>
-          <!-- Форма для ввода данных сессии -->
           <q-input
             v-model="name"
             label="Название сессии"
