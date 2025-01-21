@@ -13,10 +13,10 @@ async function loadServer() {
   const storedServer = localStorage.getItem('serverUrl');
   if (storedServer) {
     api.value = new TrsApi(storedServer);
-    console.log(api.value);
+
     const status = await api.value.getStatus();
       if (status === "ok"){
-        const selectedServerApi = api.value;
+        selectedServerApi.value = api.value;
         isConnected.value = true;
         return selectedServerApi
       }
