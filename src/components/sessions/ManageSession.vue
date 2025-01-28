@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, onMounted, defineEmits } from 'vue'
+import { ref, onMounted } from 'vue'
 import type { ApiResponse, Session } from 'src/services/trs/models'
 import type { TrsApi } from 'src/services/trs/api'
 import { AxiosError } from 'axios'

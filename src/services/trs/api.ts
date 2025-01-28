@@ -31,7 +31,7 @@ export class TrsApi {
   }
 
   async getStatus(): Promise<ServerStatus> {
-    return (await this.get('v1/status')).data as ServerStatus
+    return (await this.get('status')).data as ServerStatus
   }
 
   async updateSession(name: string, isActive: boolean | null = null, proxy: string | null = null): Promise<Session | undefined> {

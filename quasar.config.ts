@@ -13,13 +13,13 @@ export default defineConfig((ctx) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
-      'i18n',
-      'axios'
+      '~/src/shared/boot/i18n',
+      '~/src/shared/boot/axios',
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: [
-      'app.scss'
+      '~/src/shared/styles/app.scss'
     ],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
@@ -123,17 +123,18 @@ export default defineConfig((ctx) => {
     animations: [],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#sourcefiles
-    // sourceFiles: {
-    //   rootComponent: 'src/App.vue',
-    //   router: 'src/router/index',
-    //   store: 'src/store/index',
+    sourceFiles: {
+      rootComponent: 'src/app/App.vue',
+      router: 'src/app/router/index',
+      store: 'src/app/store/index',
+
     //   pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
     //   pwaServiceWorker: 'src-pwa/custom-service-worker',
     //   pwaManifestFile: 'src-pwa/manifest.json',
     //   electronMain: 'src-electron/electron-main',
     //   electronPreload: 'src-electron/electron-preload'
     //   bexManifestFile: 'src-bex/manifest.json
-    // },
+    },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-ssr/configuring-ssr
     ssr: {
