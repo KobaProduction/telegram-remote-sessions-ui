@@ -125,8 +125,8 @@ export default defineConfig((ctx) => {
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#sourcefiles
     sourceFiles: {
       rootComponent: 'src/app/App.vue',
-      router: 'src/app/router/index',
-      store: 'src/app/store/index',
+      router: 'src/app/routing',
+      store: 'src/app/stores',
 
     //   pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
     //   pwaServiceWorker: 'src-pwa/custom-service-worker',
