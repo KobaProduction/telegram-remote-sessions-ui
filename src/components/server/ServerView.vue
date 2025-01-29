@@ -2,15 +2,15 @@
 import { ref, onMounted } from 'vue'
 import SessionList from 'components/sessions/SessionList.vue'
 // import CreateSessionButton from 'components/server/sessions/CreateSession.vue'
-import type { SessionListResponse } from 'src/services/trs/models'
-import type { TrsApi } from 'src/services/trs/api'
+import type { SessionListResponse } from 'src/shared/api/trs/models'
+import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
 const sessions = ref<string[] | null>(null)
 const error = ref<string>("")
 
 
 const props = defineProps<{
-  api: TrsApi;
+  api: TelegramRemoteSessionApi;
 }>();
 
 

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import ManageSession from 'components/sessions/ManageSession.vue';
-import type { TrsApi } from 'src/services/trs/api'
+import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
 
 const props = defineProps<{
   sessions: string[];
-  api: TrsApi;
+  api: TelegramRemoteSessionApi;
 }>();
 
 const sessionsPerPage = 5;

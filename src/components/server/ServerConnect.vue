@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { isAxiosError } from 'axios'
-import type { TrsApi } from 'src/services/trs/api'
+import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
 const serverStatus = ref<'checking' | 'online' | 'offline'>('checking')
 const serverErrorMessage = ref('')
 
 const props = defineProps<{
-  api: TrsApi;
+  api: TelegramRemoteSessionApi;
 }>();
 
 const checkServer = async () => {

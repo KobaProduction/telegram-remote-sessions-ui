@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import ServerView from 'components/server/ServerView.vue'
 import { onMounted, ref } from 'vue'
-import { TrsApi } from 'src/services/trs/api'
+import { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import ConnectForm from 'components/server/ConnectForm.vue'
 
-let api = new TrsApi()
-const selectedServerApi = ref<TrsApi | null>(null)
+let api = new TelegramRemoteSessionApi()
+const selectedServerApi = ref<TelegramRemoteSessionApi | null>(null)
 const isConnected = ref(false)
 
 
@@ -14,7 +14,7 @@ async function loadServer() {
   const lastConnectedServerUrl = localStorage.getItem('lastConnectedServerUrl')
   if (!lastConnectedServerUrl) return
 
-  api = new TrsApi(lastConnectedServerUrl)
+  api = new TelegramRemoteSessionApi(lastConnectedServerUrl)
 
   const status = await api.getStatus()
   if (status.status) {
@@ -29,7 +29,7 @@ async function loadServer() {
 
 async function connectToServer(serverUrl: string) {
   try {
-    api = new TrsApi(serverUrl)
+    api = new TelegramRemoteSessionApi(serverUrl)
   } catch (e) {
     return console.error(e)
   }

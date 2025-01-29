@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { ApiResponse, Session } from 'src/services/trs/models'
-import type { TrsApi } from 'src/services/trs/api'
+import type { ApiResponse, Session } from 'src/shared/api/trs/models'
+import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import { AxiosError } from 'axios'
 
-const props = defineProps<{ sessionName: string; api: TrsApi }>()
+const props = defineProps<{ sessionName: string; api: TelegramRemoteSessionApi }>()
 const emit = defineEmits(['close'])
 
 const sessionDetails = ref<Session | null>(null)

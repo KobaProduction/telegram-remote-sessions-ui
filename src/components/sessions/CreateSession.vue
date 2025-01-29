@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import type { TrsApi } from 'src/services/trs/api'
+import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
 const props = defineProps<{
-  api: TrsApi;
+  api: TelegramRemoteSessionApi;
 }>();
 
 const name = ref('test');
