@@ -2,7 +2,7 @@
 import {ref} from 'vue'
 import Axios from "axios";
 import {Dark} from "quasar";
-import { ORGANIZATION_DATA_URL } from 'src/shared/configs'
+import { ORGANIZATION_DATA_URL } from 'src/shared/config/configs'
 
 export interface CommunityLinkProps {
   title: string;
