@@ -13,8 +13,8 @@ export default defineConfig((ctx) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
-      '~/src/shared/boot/i18n',
-      '~/src/shared/boot/axios',
+      '~/src/shared/i18n',
+      '~/src/shared/api/axios/axios.ts',
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
