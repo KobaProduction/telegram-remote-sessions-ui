@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import CommunityLinksView from 'src/widgets/CommunityLinksView.vue'
 const leftDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
@@ -19,6 +20,7 @@ function toggleLeftDrawer() {
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header> Essential Links </q-item-label>
+        <CommunityLinksView/>
       </q-list>
     </q-drawer>
     <q-page-container>
