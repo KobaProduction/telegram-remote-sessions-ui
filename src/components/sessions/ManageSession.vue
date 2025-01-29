@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { ApiResponse, Session } from 'src/shared/api/trs/models'
+import type { ApiResponse, Session } from 'src/shared/api/trs/model'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import { AxiosError } from 'axios'
 

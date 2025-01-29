@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import SessionList from 'components/sessions/SessionList.vue'
 // import CreateSessionButton from 'components/server/sessions/CreateSession.vue'
-import type { SessionListResponse } from 'src/shared/api/trs/models'
+import type { SessionListResponse } from 'src/shared/api/trs/model'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
 const sessions = ref<string[] | null>(null)

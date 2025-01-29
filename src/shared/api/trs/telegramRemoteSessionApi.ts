@@ -5,7 +5,7 @@ import type {
   SessionListResponse,
   SessionParameters,
   ApiResponse, ServerStatus
-} from './models'
+} from './model'
 
 export class TelegramRemoteSessionApi {
   private axios: AxiosInstance
