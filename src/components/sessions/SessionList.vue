@@ -1,40 +1,42 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import ManageSession from 'components/sessions/ManageSession.vue';
+import { ref, computed } from 'vue'
+import ManageSession from 'components/sessions/ManageSession.vue'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
-
 
 const props = defineProps<{
   sessions: string[];
   api: TelegramRemoteSessionApi;
-}>();
+}>()
 
-const sessionsPerPage = 5;
-const totalSessions = ref(props.sessions.length);
-const totalPages = ref(Math.ceil(totalSessions.value / sessionsPerPage));
+const sessionsPerPage = 5
 const currentPage = ref<number>(1)
 
-const pageSessions = props.sessions.slice((currentPage.value - 1) * sessionsPerPage, currentPage.value * sessionsPerPage)
+const totalPages = computed(() => {
+  return Math.ceil(props.sessions.length / sessionsPerPage)
+})
 
-const selectedSession = ref<string | null>(null);
-const isDialogOpen = ref(false);
+const pageSessions = computed(() => {
+  const start = (currentPage.value - 1) * sessionsPerPage
+  const end = start + sessionsPerPage
+  return props.sessions.slice(start, end)
+})
 
-
+const selectedSession = ref<string | null>(null)
+const isDialogOpen = ref(false)
 
 const openSession = (session: string) => {
-  selectedSession.value = session;
-  isDialogOpen.value = true;
-};
+  selectedSession.value = session
+  isDialogOpen.value = true
+}
 
 const closeSession = () => {
-  selectedSession.value = null;
-  isDialogOpen.value = false;
-};
-
+  selectedSession.value = null
+  isDialogOpen.value = false
+}
 </script>
 
 <template>
-  <div class="q-py-md">
+  <div class="q-py-md" style="min-height: 350px">
     <div v-for="session in pageSessions" :key="session" class="temp">
       <q-card class="row">
         <q-card-section>
@@ -45,15 +47,13 @@ const closeSession = () => {
             <q-btn label="УПРАВЛЯТЬ" color="secondary" @click="openSession(session)" />
           </q-card-actions>
         </q-card-section>
-
-
       </q-card>
     </div>
   </div>
 
   <div>
     <q-pagination
-      v-if="totalSessions > sessionsPerPage"
+      v-if="totalPages > 1"
       v-model="currentPage"
       :max="totalPages"
       class="q-pa-xs"
