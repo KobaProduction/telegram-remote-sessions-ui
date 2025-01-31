@@ -35,7 +35,7 @@ onMounted(loadServer)
 <template>
   <div v-if="serverStore.isConnected && serverStore.selectedServerApi">
     <ServerView :api="api" />
-    <q-btn color="negative" label="Отключиться" @click="serverStore.disconnectFromServer" class="q-mt-md" />
+
   </div>
   <div v-else>
     <p>⚠️ Server not selected</p>

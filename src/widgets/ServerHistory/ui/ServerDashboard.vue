@@ -97,13 +97,25 @@ onMounted(() => {
 </script>
 
 <template>
+
   <q-card class="q-pa-md" style="min-width: 450px; max-width: 450px">
+    <q-banner v-if="serverStore.isConnected" class="q-mb-md">
+      <div class="text-h6">Connected to server: {{ serverStore.lastConnectedServerUrl }}</div>
+      <q-btn
+        color="negative"
+        label="Отключиться"
+        @click="serverStore.disconnectFromServer()"
+        class="q-mt-sm"
+        size="sm"
+      />
+    </q-banner>
     <q-expansion-item
       v-model="isExpanded"
       icon="list"
       label="Список серверов"
     >
       <q-card-section>
+
         <q-input v-model="newServer" label="Добавить сервер" outlined dense />
         <q-btn
           color="primary"
