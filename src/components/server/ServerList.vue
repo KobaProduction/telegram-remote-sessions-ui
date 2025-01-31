@@ -3,11 +3,12 @@ import ServerView from 'components/server/ServerView.vue'
 import { onMounted, ref } from 'vue'
 import { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import ConnectForm from 'components/server/ConnectForm.vue'
+import { useServerStore } from 'src/shared/api/server/serverStore'
 
 let api = new TelegramRemoteSessionApi()
 const selectedServerApi = ref<TelegramRemoteSessionApi | null>(null)
 const isConnected = ref(false)
-
+const serverStore = useServerStore()
 
 
 async function loadServer() {
@@ -27,31 +28,19 @@ async function loadServer() {
   }
 }
 
-async function connectToServer(serverUrl: string) {
-  try {
-    api = new TelegramRemoteSessionApi(serverUrl)
-  } catch (e) {
-    return console.error(e)
-  }
-
-  const status = await api.getStatus()
-
-  if (!status.status) return console.log("Failed to connect to server")
-  localStorage.setItem('lastConnectedServerUrl', serverUrl)
-  isConnected.value = true
-}
 
 onMounted(loadServer)
 </script>
 
 <template>
-  <div v-if="isConnected">
+  <div v-if="serverStore.isConnected && serverStore.selectedServerApi">
     <ServerView :api="api" />
+    <q-btn color="negative" label="Отключиться" @click="serverStore.disconnectFromServer" class="q-mt-md" />
   </div>
   <div v-else>
-    <p>Server not selected</p>
-    <ConnectForm @onConnect="connectToServer" />
+    <p>⚠️ Server not selected</p>
+    <ConnectForm @onConnect="serverStore.connectToServer" />
   </div>
 </template>
 
-<style scoped></style>
+<style></style>
