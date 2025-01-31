@@ -20,7 +20,7 @@ const fetchSessions = async () => {
     const data: SessionListResponse = await props.api.getSessions()
     sessions.value = data.sessions
   } catch (e) {
-    error.value = `Error when try loading sessions: ${e}`
+    error.value = `Error when trying to load sessions: ${e}`
   }
 }
 onMounted(fetchSessions)
