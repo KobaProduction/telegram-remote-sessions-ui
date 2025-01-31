@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import ManageSession from 'components/sessions/ManageSession.vue'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
@@ -8,17 +8,41 @@ const props = defineProps<{
   api: TelegramRemoteSessionApi;
 }>()
 
-const sessionsPerPage = 5
+const searchQuery = ref<string>('')
+
+const sessionsPerPageOptions = [5, 10, 15, 20]
+
+const sessionsPerPage = ref<number>(parseInt(localStorage.getItem('sessionsPerPage') || '5', 10))
+
 const currentPage = ref<number>(1)
 
+const filteredSessions = computed(() => {
+  if (!searchQuery.value) {
+    return props.sessions
+  }
+  return props.sessions.filter((session) =>
+    session.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
 const totalPages = computed(() => {
-  return Math.ceil(props.sessions.length / sessionsPerPage)
+  return Math.ceil(filteredSessions.value.length / sessionsPerPage.value)
 })
 
 const pageSessions = computed(() => {
-  const start = (currentPage.value - 1) * sessionsPerPage
-  const end = start + sessionsPerPage
-  return props.sessions.slice(start, end)
+  const start = (currentPage.value - 1) * sessionsPerPage.value
+  const end = start + sessionsPerPage.value
+  return filteredSessions.value.slice(start, end)
+})
+
+const updateSessionsPerPage = (value: number) => {
+  sessionsPerPage.value = value
+  localStorage.setItem('sessionsPerPage', value.toString())
+  currentPage.value = 1
+}
+
+watch(searchQuery, () => {
+  currentPage.value = 1
 })
 
 const selectedSession = ref<string | null>(null)
@@ -36,33 +60,64 @@ const closeSession = () => {
 </script>
 
 <template>
-  <div class="q-py-md" style="min-height: 350px">
-    <div v-for="session in pageSessions" :key="session" class="temp">
-      <q-card class="row">
-        <q-card-section>
-          <p class="q-ma-none">{{ session }}</p>
-        </q-card-section>
-        <q-card-section class="q-pa-none q-ml-auto">
-          <q-card-actions align="center">
-            <q-btn label="УПРАВЛЯТЬ" color="secondary" @click="openSession(session)" />
-          </q-card-actions>
-        </q-card-section>
-      </q-card>
-    </div>
-  </div>
-
-  <div>
-    <q-pagination
-      v-if="totalPages > 1"
-      v-model="currentPage"
-      :max="totalPages"
-      class="q-pa-xs"
+  <div class="q-py-md" style="min-height: 550px">
+    <q-input
+      v-model="searchQuery"
+      label="Session name"
+      outlined
+      dense
+      class="q-mb-md"
     />
-  </div>
+    <q-select
+      v-model="sessionsPerPage"
+      :options="sessionsPerPageOptions"
+      label="Sessions on the page"
+      outlined
+      dense
+      class="q-mb-md"
+      @update:model-value="updateSessionsPerPage"
+    />
+    <div v-if="filteredSessions.length === 0">
+      <q-banner class="bg-warning text-black">
+        No session with this name was found
+      </q-banner>
+    </div>
+    <div v-else>
+      <div v-for="session in pageSessions" :key="session" class="temp">
+        <q-card class="row">
+          <q-card-section>
+            <p class="q-ma-none">{{ session }}</p>
+          </q-card-section>
+          <q-card-section class="q-pa-none q-ml-auto">
+            <q-card-actions align="center">
+              <q-btn
+                label="edit"
+                color="secondary"
+                @click="openSession(session)"
+              />
+            </q-card-actions>
+          </q-card-section>
+        </q-card>
+      </div>
+      <q-pagination
+        v-if="totalPages > 1"
+        v-model="currentPage"
+        direction-links
+        boundary-links
+        :max="totalPages"
+        class="q-pa-xs q-mt-md"
 
-  <q-dialog v-model="isDialogOpen">
-    <ManageSession v-if="selectedSession" :sessionName="selectedSession" :api="props.api" @close="closeSession" />
-  </q-dialog>
+      />
+    </div>
+    <q-dialog v-model="isDialogOpen">
+      <ManageSession
+        v-if="selectedSession"
+        :sessionName="selectedSession"
+        :api="props.api"
+        @close="closeSession"
+      />
+    </q-dialog>
+  </div>
 </template>
 
 <style scoped>
