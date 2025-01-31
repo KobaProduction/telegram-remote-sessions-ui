@@ -1,3 +1,3 @@
-import ServerHistory from './ui/ServerHistory.vue'
+import ServerDashboard from './ui/ServerDashboard.vue'
 
-export { ServerHistory }
+export { ServerDashboard }
