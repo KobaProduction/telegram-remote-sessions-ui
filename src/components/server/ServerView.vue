@@ -39,7 +39,6 @@ async function checkConnection() {
       isConnected.value = true
       showErrorModal.value = false
       fetchSessions()
-      console.log('Сессии получены')
     } else {
       throw new Error('Server not responding properly')
     }
