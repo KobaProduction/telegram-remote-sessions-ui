@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useServerStore } from 'src/shared/api/server/serverStore'
-import axios from 'axios'
+import { TelegramRemoteSessionApi } from 'src/shared/api/trs'
 
 const STORAGE_KEY = 'server_history'
 const serversList = ref<string[]>([])
@@ -13,18 +13,39 @@ const editedServer = ref<string>('')
 const itemsPerPage = 5
 const currentPage = ref(1)
 const isExpanded = ref(false)
-const serverStore = useServerStore() // Подключаем глобальное состояние
+const serverStore = useServerStore()
+
+
+const createApiInstance = (serverUrl: string): TelegramRemoteSessionApi => {
+  let url = serverUrl
+  if (!/^https?:\/\//.test(url)) {
+    url = `http://${url}`
+  }
+  return new TelegramRemoteSessionApi(url)
+}
 
 const saveToStorage = () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(serversList.value))
 }
 
-const addServer = () => {
-  if (newServer.value?.trim() && !serversList.value.includes(newServer.value.trim())) {
-    serversList.value.push(newServer.value.trim())
-    saveToStorage()
-    newServer.value = null
-    updateServerStatuses()
+const addServer = async () => {
+  if (!newServer.value?.trim()) return
+
+  const server = newServer.value.trim()
+  if (serversList.value.includes(server)) return
+
+  try {
+    const api = createApiInstance(server)
+    const status = await api.getStatus()
+
+    if (status.status === 'ok') {
+      serversList.value.push(server)
+      saveToStorage()
+      newServer.value = null
+      updateServerStatuses()
+    }
+  } catch (error) {
+    console.error('Ошибка при проверке сервера:', error)
   }
 }
 
@@ -34,19 +55,30 @@ const removeServer = (index: number) => {
   updateServerStatuses()
 }
 
-const editServer = (index: number) => {
+const editServer = async (index: number) => {
+  const originalServer = serversList.value[index]
   editingIndex.value = index
-  if (serversList.value[index]) {
-    editedServer.value = serversList.value[index]
-  }
+  editedServer.value = originalServer ?? ''
 }
 
-const saveEdit = (index: number) => {
-  if (editedServer.value.trim()) {
-    serversList.value[index] = editedServer.value.trim()
-    saveToStorage()
-    updateServerStatuses()
+const saveEdit = async (index: number) => {
+  if (!editedServer.value.trim()) return
+
+  const newServerUrl = editedServer.value.trim()
+
+  try {
+    const api = createApiInstance(newServerUrl)
+    const status = await api.getStatus()
+
+    if (status.status === 'ok') {
+      serversList.value[index] = newServerUrl
+      saveToStorage()
+      await updateServerStatuses()
+    }
+  } catch (error) {
+    console.error('Ошибка при проверке сервера:', error)
   }
+
   editingIndex.value = null
 }
 
@@ -61,28 +93,17 @@ const paginatedServers = computed(() => {
 const updateServerStatuses = async () => {
   const statuses = new Map<string, boolean>()
   for (const server of serversList.value) {
-    const status = await checkServerStatus(server)
-    statuses.set(server, status)
+    try {
+      const api = createApiInstance(server)
+      const status = await api.getStatus()
+      statuses.set(server, status.status === 'ok')
+    } catch (error) {
+      statuses.set(server, false)
+      console.log('При обновлении статуса сервера:', server, 'произошла ошибка:', error)
+    }
   }
+
   serverStatuses.value = statuses
-}
-
-const checkServerStatus = async (server: string) => {
-  let fullServerUrl = server
-
-  if (!/^https?:\/\//.test(server)) {
-    fullServerUrl = `http://${server}`
-  }
-
-  const statusUrl = `${fullServerUrl}status`
-  try {
-    console.log('Проверка статуса:', statusUrl)
-    const response = await axios.get(statusUrl)
-    return response.status === 200
-  } catch (error) {
-    console.error(`Ошибка при подключении к серверу ${fullServerUrl}:`, error)
-    return false
-  }
 }
 
 const getStatusIcon = (server: string) => {
@@ -115,7 +136,6 @@ onMounted(() => {
       label="Список серверов"
     >
       <q-card-section>
-
         <q-input v-model="newServer" label="Добавить сервер" outlined dense />
         <q-btn
           color="primary"
@@ -142,6 +162,7 @@ onMounted(() => {
                 :name="getStatusIcon(server)"
                 class="q-mr-sm"
                 style="flex-shrink: 0;"
+                :color="serverStatuses.get(server) ? 'positive' : 'negative'"
               />
               <q-input
                 v-if="editingIndex === index"
@@ -158,9 +179,10 @@ onMounted(() => {
             <q-btn
               color="secondary"
               label="Подключиться"
-              @click="serverStore.connectToServer(server) "
+              @click="serverStore.connectToServer(server)"
               size="sm"
               class="q-ml-sm"
+              :disable="!serverStatuses.get(server)"
             />
           </q-item-section>
           <q-item-section side>
