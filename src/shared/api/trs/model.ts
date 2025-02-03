@@ -9,7 +9,7 @@ export interface SessionParameters {
 }
 
 export interface ServerStatus {
-  status: boolean
+  status: string
   version: string
   name: string
 }
