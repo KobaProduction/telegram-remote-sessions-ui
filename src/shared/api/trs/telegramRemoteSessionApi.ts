@@ -54,6 +54,6 @@ export class TelegramRemoteSessionApi {
   }
 
   async getSessions(): Promise<SessionListResponse> {
-    return (await this.get(`v1/sessions/read`)).data as SessionListResponse
+    return (await this.get(`/v1/sessions/read`)).data as SessionListResponse
   }
 }
