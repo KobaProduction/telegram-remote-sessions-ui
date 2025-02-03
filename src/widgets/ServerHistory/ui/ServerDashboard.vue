@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useServerStore } from 'src/shared/api/server/serverStore'
 import { TelegramRemoteSessionApi } from 'src/shared/api/trs'
+import { AxiosError } from 'axios'
 
 const STORAGE_KEY = 'server_history'
 const serversList = ref<string[]>([])
@@ -38,7 +39,7 @@ const addServer = async () => {
     const api = createApiInstance(server)
     const status = await api.getStatus()
 
-    if (status.status === 'ok') {
+    if (status.status === "ok") {
       serversList.value.push(server)
       saveToStorage()
       newServer.value = null
@@ -97,9 +98,11 @@ const updateServerStatuses = async () => {
       const api = createApiInstance(server)
       const status = await api.getStatus()
       statuses.set(server, status.status === 'ok')
-    } catch (error) {
-      statuses.set(server, false)
-      console.log('При обновлении статуса сервера:', server, 'произошла ошибка:', error)
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        statuses.set(server, false)
+        console.log("При обновлении статуса сервера:", server, "произошла ошибка:", error.message)
+      }
     }
   }
 
