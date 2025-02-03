@@ -9,19 +9,28 @@ export const useServerStore = defineStore('server', () => {
   const selectedServerApi = ref<TelegramRemoteSessionApi | null>(null)
   const lastConnectedServerUrl = ref(localStorage.getItem(STORAGE_KEY) || '')
 
-  async function connectToServer(serverUrl: string) {
+  async function connectToServer(serverUrl: string, rememberServer: boolean = false) {
     try {
       const api = new TelegramRemoteSessionApi(serverUrl)
       const status = await api.getStatus()
 
       if (!status.status) {
+
         console.log('❌ Failed to connect to server:', serverUrl)
         return
       }
-
       console.log('✅ Successful connection to the server!:', serverUrl)
+      if (rememberServer){
+        const storedServers = JSON.parse(localStorage.getItem("server_history") || '[]')
+        if (!storedServers.includes(serverUrl)) {
+          storedServers.push(serverUrl);
+          localStorage.setItem("server_history", JSON.stringify(storedServers));
+          console.log("Сервер был добавлен") //todo: update server_history in real time
+        }
+      }
+
       localStorage.setItem(STORAGE_KEY, serverUrl)
-      selectedServerApi.value = api // сохранение правильного экземпляра API
+      selectedServerApi.value = api
       isConnected.value = true
     } catch (e) {
       console.error("Error connecting to server:", e)
@@ -42,7 +51,7 @@ export const useServerStore = defineStore('server', () => {
     }
   }
 
-  restoreConnection()
+  restoreConnection().then()
 
   return { isConnected, selectedServerApi, lastConnectedServerUrl, connectToServer, disconnectFromServer }
 })
