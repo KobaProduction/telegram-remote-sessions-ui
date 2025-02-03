@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
 const STORAGE_KEY = 'lastConnectedServerUrl'
@@ -32,6 +32,7 @@ export const useServerStore = defineStore('server', () => {
       localStorage.setItem(STORAGE_KEY, serverUrl)
       selectedServerApi.value = api
       isConnected.value = true
+      return api
     } catch (e) {
       console.error("Error connecting to server:", e)
     }
@@ -52,6 +53,7 @@ export const useServerStore = defineStore('server', () => {
   }
 
   restoreConnection().then()
+  const api = computed(() => selectedServerApi.value instanceof TelegramRemoteSessionApi ? selectedServerApi.value : null)
 
-  return { isConnected, selectedServerApi, lastConnectedServerUrl, connectToServer, disconnectFromServer }
+  return { isConnected, selectedServerApi, lastConnectedServerUrl, connectToServer, disconnectFromServer, api }
 })

@@ -34,8 +34,7 @@ onMounted(loadServer)
 
 <template>
   <div v-if="serverStore.isConnected && serverStore.selectedServerApi">
-    <ServerView :api="api" />
-
+    <ServerView v-if="serverStore.api" :api="serverStore.api!" />
   </div>
   <div v-else>
     <p>⚠️Server not selected</p>
