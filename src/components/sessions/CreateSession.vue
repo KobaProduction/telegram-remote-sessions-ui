@@ -273,7 +273,7 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
               />
             </q-card-section>
             <q-card-actions align="right">
-              <q-checkbox v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
+              <q-toggle v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
               <q-btn-group flat unelevated>
 
                 <q-btn label="Выйти" color="negative" @click="cancelAction" />
