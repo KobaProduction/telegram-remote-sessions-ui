@@ -27,7 +27,7 @@ const isDialogOpen = ref(false)
 const devices = ref<Device[]>(JSON.parse(localStorage.getItem('devices') || '[]') as Device[])
 const isEditingDevice = ref(false)
 const originalDeviceName = ref<string | null>(null)
-
+const viewDevices = ref<boolean>(false)
 const sessionData = ref<SessionData>({
   name: '',
   appVersion: '',
@@ -273,8 +273,10 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
               />
             </q-card-section>
             <q-card-actions align="right">
+              <q-checkbox v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
               <q-btn-group flat unelevated>
-                <q-btn label="Отмена" color="negative" @click="cancelAction" />
+
+                <q-btn label="Выйти" color="negative" @click="cancelAction" />
                 <q-btn
                   v-if="!isEditingDevice"
                   label="Создать"
@@ -287,10 +289,10 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
             </q-card-actions>
           </div>
 
-          <div class="col-12" style="">
+          <div v-if="viewDevices" class="col-12" style="">
             <q-card-section>
               <div class="row items-center justify-between q-mb-sm">
-                <h6 class="q-ma-none">Сохраненные устройства</h6>
+                <h6 class="q-ma-none">Девайсы</h6>
                 <q-select
                   v-model="rowsPerPage"
                   :options="rowsPerPageOptions"
