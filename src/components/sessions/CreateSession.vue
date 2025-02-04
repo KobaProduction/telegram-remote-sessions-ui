@@ -1,145 +1,366 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
-const props = defineProps<{
-  api: TelegramRemoteSessionApi;
-}>();
+interface SessionData {
+  name: string
+  appVersion: string
+  langCode: string
+  deviceModel: string
+  systemVersion: string
+  systemLangCode: string
+  apiId: number
+  apiHash: string
+  sessionName: string
+}
 
-const name = ref('test');
-const appVersion = ref('test');
-const langCode = ref('test');
-const deviceModel = ref('test');
-const systemVersion = ref('test');
-const systemLangCode = ref('test');
-const apiId = ref(1);
-const apiHash = ref('test');
+interface Device {
+  deviceName: string
+  data: SessionData
+}
 
-const isDialogOpen = ref(false);
+const props = defineProps<{ api: TelegramRemoteSessionApi }>()
+const router = useRouter()
 
+const isDialogOpen = ref(false)
+const devices = ref<Device[]>(JSON.parse(localStorage.getItem('devices') || '[]') as Device[])
+const isEditingDevice = ref(false)
+const originalDeviceName = ref<string | null>(null)
 
-const router = useRouter();
+const sessionData = ref<SessionData>({
+  name: '',
+  appVersion: '',
+  langCode: '',
+  deviceModel: '',
+  systemVersion: '',
+  systemLangCode: '',
+  apiId: 0,
+  apiHash: '',
+  sessionName: ''
+})
+
+const currentPage = ref(1)
+const rowsPerPage = ref(5)
+const rowsPerPageOptions = [5, 10, 20] as const
+
+const paginatedDevices = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage.value
+  return devices.value.slice(start, start + rowsPerPage.value)
+})
+
+const overwriteDialogOpen = ref(false)
+const pendingOverwriteIndex = ref<number | null>(null)
+
+const deleteConfirmDialogOpen = ref(false)
+const pendingDeleteIndex = ref<number | null>(null)
 
 const openDialog = () => {
-  isDialogOpen.value = true;
-};
+  isDialogOpen.value = true
+}
 
 const closeDialog = () => {
-  isDialogOpen.value = false;
-};
+  isDialogOpen.value = false
+  isEditingDevice.value = false
+  originalDeviceName.value = null
+  sessionData.value = {
+    name: '',
+    appVersion: '',
+    langCode: '',
+    deviceModel: '',
+    systemVersion: '',
+    systemLangCode: '',
+    apiId: 0,
+    apiHash: '',
+    sessionName: ''
+  }
+}
 
+const cancelAction = () => {
+  if (isEditingDevice.value) {
+    isEditingDevice.value = false
+    originalDeviceName.value = null
+  }
+  closeDialog()
+}
+
+const saveDevice = () => {
+  if (isEditingDevice.value) {
+    if (originalDeviceName.value !== null) {
+      const index = devices.value.findIndex(d => d.deviceName === originalDeviceName.value)
+      if (index !== -1) {
+        devices.value[index] = { deviceName: sessionData.value.name, data: { ...sessionData.value } }
+        localStorage.setItem('devices', JSON.stringify(devices.value))
+      }
+      originalDeviceName.value = null
+    }
+    isEditingDevice.value = false
+    return
+  }
+
+  const existingIndex = devices.value.findIndex(d => d.deviceName === sessionData.value.name)
+  if (existingIndex !== -1) {
+    pendingOverwriteIndex.value = existingIndex
+    overwriteDialogOpen.value = true
+    return
+  }
+
+  devices.value.push({ deviceName: sessionData.value.name, data: { ...sessionData.value } })
+  localStorage.setItem('devices', JSON.stringify(devices.value))
+}
+
+const confirmOverwrite = () => {
+  if (pendingOverwriteIndex.value !== null) {
+    devices.value[pendingOverwriteIndex.value] = {
+      deviceName: sessionData.value.name,
+      data: { ...sessionData.value }
+    }
+    localStorage.setItem('devices', JSON.stringify(devices.value))
+    pendingOverwriteIndex.value = null
+    overwriteDialogOpen.value = false
+  }
+}
+
+const cancelOverwrite = () => {
+  pendingOverwriteIndex.value = null
+  overwriteDialogOpen.value = false
+}
+
+const loadDevice = (device: Device) => {
+  sessionData.value = { ...device.data }
+  isEditingDevice.value = false
+  originalDeviceName.value = null
+}
+
+const editDevice = (index: number) => {
+  const device = devices.value[index]
+  if (!device) return
+  originalDeviceName.value = device.deviceName
+  sessionData.value = { ...device.data }
+  isEditingDevice.value = true
+}
+
+const requestDeleteDevice = (index: number) => {
+  pendingDeleteIndex.value = index
+  deleteConfirmDialogOpen.value = true
+}
+
+const confirmDeleteDevice = () => {
+  if (pendingDeleteIndex.value !== null) {
+    devices.value.splice(pendingDeleteIndex.value, 1)
+    localStorage.setItem('devices', JSON.stringify(devices.value))
+    pendingDeleteIndex.value = null
+    deleteConfirmDialogOpen.value = false
+    currentPage.value = 1
+  }
+}
+
+const cancelDeleteDevice = () => {
+  pendingDeleteIndex.value = null
+  deleteConfirmDialogOpen.value = false
+}
 
 const createNewSession = async () => {
   try {
-    console.log('Отправляем запрос на создание сессии...');
-    const result = await props.api.createSession(name.value, {
-      app_version: appVersion.value,
-      lang_code: langCode.value,
-      device_model: deviceModel.value,
-      system_version: systemVersion.value,
-      system_lang_code: systemLangCode.value,
-      api_id: apiId.value,
-      api_hash: apiHash.value,
-    });
+    const requestData = {
+      name: sessionData.value.name,
+      app_version: sessionData.value.appVersion,
+      lang_code: sessionData.value.langCode,
+      device_model: sessionData.value.deviceModel,
+      system_version: sessionData.value.systemVersion,
+      system_lang_code: sessionData.value.systemLangCode,
+      api_id: sessionData.value.apiId,
+      api_hash: sessionData.value.apiHash,
+      session_name: sessionData.value.sessionName
+    }
 
-    console.log('Ответ от сервера:', result);
+    const result = await props.api.createSession(sessionData.value.name, requestData)
+
     if (result.status) {
-      console.log('Сессия успешно создана!');
-
-      closeDialog();
-      await router.push('/sessions');
-    } else if (result.message.includes('Session already exist')) {
-      console.log('Ошибка: Сессия уже существует');
-
-    } else {
-      console.log('Ошибка от сервера:', result.message);
+      closeDialog()
+      await router.push('/sessions')
     }
   } catch (error) {
     console.error('Ошибка при создании сессии:', error)
   }
 }
+
+
+const headerText = computed(() => isEditingDevice.value ? 'Редактирование устройства' : 'Создать новую сессию')
+
+const sessionNameLabel = computed(() =>
+  isEditingDevice.value ? `Название устройства (${sessionData.value.name})` : 'Название сессии'
+)
+
+const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя сессии' : '')
 </script>
+
 
 <template>
   <div class="col self-center q-pa-md">
-    <q-btn
-      @click="openDialog"
-      color="primary"
-      label="Создать сессию"
-      class="q-mt-md"
-    />
+    <q-btn @click="openDialog" color="primary" label="Создать сессию" class="q-mt-md" />
 
-    <q-dialog v-model="isDialogOpen">
-      <q-card>
+    <q-dialog v-model="isDialogOpen" >
+      <q-card class="modal-card">
+        <div class="row">
+          <div class="col-12">
+            <q-card-section>
+              <div class="row items-center">
+                <h6 class="q-ma-none">{{ headerText }}</h6>
+              </div>
+              <q-input
+                v-model="sessionData.name"
+                :label="sessionNameLabel"
+                outlined
+                class="q-mb-sm"
+              />
+              <q-input
+                v-if="isEditingDevice"
+                v-model="sessionData.sessionName"
+                :label="sessionEditNameLabel"
+                outlined
+                class="q-mb-sm"
+              />
+              <q-input
+                v-model="sessionData.appVersion"
+                label="Версия приложения"
+                outlined
+                class="q-mb-sm"
+                color="amber"
+                hint="Внимание! Используйте актуальную версию telegram. Иначе шанс бана выше!."
+                hide-bottom-space
+              />
+              <q-input
+                v-model="sessionData.langCode"
+                label="Язык"
+                outlined
+                class="q-mb-sm"
+              />
+              <q-input
+                v-model="sessionData.deviceModel"
+                label="Модель устройства"
+                outlined
+                class="q-mb-sm"
+              />
+              <q-input
+                v-model="sessionData.systemVersion"
+                label="Версия системы"
+                outlined
+                class="q-mb-sm"
+              />
+              <q-input
+                v-model="sessionData.systemLangCode"
+                label="Язык системы"
+                outlined
+                class="q-mb-sm"
+              />
+              <q-input
+                v-model="sessionData.apiId"
+                label="API ID"
+                type="number"
+                outlined
+                class="q-mb-sm"
+                color="amber"
+                hint="Внимание! При использовании app_id из официального приложений телеграм - вероятность получить блокировку выше. При неверном app_id авторизация сессии может не произойти или привести к проблемам со стороны телеграм"
+                persistent-hint
+                hide-bottom-space
+              />
+              <q-input
+                v-model="sessionData.apiHash"
+                label="API Hash"
+                outlined
+                class="q-mb-sm"
+              />
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn-group flat unelevated>
+                <q-btn label="Отмена" color="negative" @click="cancelAction" />
+                <q-btn
+                  v-if="!isEditingDevice"
+                  label="Создать"
+                  color="primary"
+                  @click="createNewSession"
+                  :disable="!sessionData.name"
+                />
+                <q-btn label="Сохранить устройство" color="secondary" @click="saveDevice" />
+              </q-btn-group>
+            </q-card-actions>
+          </div>
+
+          <div class="col-12" style="">
+            <q-card-section>
+              <div class="row items-center justify-between q-mb-sm">
+                <h6 class="q-ma-none">Сохраненные устройства</h6>
+                <q-select
+                  v-model="rowsPerPage"
+                  :options="rowsPerPageOptions"
+                  dense
+                  outlined
+                  style="max-width: 100px;"
+                  label="На странице"
+                />
+              </div>
+              <q-list v-if="devices.length">
+                <q-item v-for="(device, index) in paginatedDevices" :key="index" clickable>
+                  <q-item-section avatar>
+                    <q-icon name="devices" />
+                  </q-item-section>
+                  <q-item-section class="device-name">
+                    <q-item-label class="device-label text-truncate">
+                      {{ device.deviceName }}
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-btn-group flat dense>
+                      <q-btn icon="play_arrow" @click="loadDevice(device)" />
+                      <q-btn icon="edit" @click="editDevice((currentPage - 1) * rowsPerPage + index)" />
+                      <q-btn icon="delete" color="negative" @click="requestDeleteDevice((currentPage - 1) * rowsPerPage + index)" />
+                    </q-btn-group>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+              <div v-else class="text-center">Нет сохраненных устройств</div>
+              <div class="row items-center justify-center q-mt-sm">
+                <q-pagination
+                  v-model="currentPage"
+                  :max="Math.ceil(devices.length / rowsPerPage)"
+                  color="primary"
+                  boundary-numbers
+                />
+              </div>
+            </q-card-section>
+          </div>
+        </div>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="overwriteDialogOpen">
+      <q-card class="q-pa-md">
         <q-card-section>
-          <h6>Создать новую сессию</h6>
-          <q-input
-            v-model="name"
-            label="Название сессии"
-            outlined
-            :rules="[val => val && val.length > 0 || 'Это поле обязательно']"
-          />
-          <q-input
-            v-model="appVersion"
-            label="Версия приложения"
-            outlined
-            :rules="[val => val && val.length > 0 || 'Это поле обязательно']"
-          />
-          <q-input
-            v-model="langCode"
-            label="Язык"
-            outlined
-            :rules="[val => val && val.length > 0 || 'Это поле обязательно']"
-          />
-          <q-input
-            v-model="deviceModel"
-            label="Модель устройства"
-            outlined
-            :rules="[val => val && val.length > 0 || 'Это поле обязательно']"
-          />
-          <q-input
-            v-model="systemVersion"
-            label="Версия системы"
-            outlined
-            :rules="[val => val && val.length > 0 || 'Это поле обязательно']"
-          />
-          <q-input
-            v-model="systemLangCode"
-            label="Язык системы"
-            outlined
-            :rules="[val => val && val.length > 0 || 'Это поле обязательно']"
-          />
-          <q-input
-            v-model="apiId"
-            label="API ID"
-            outlined
-            :rules="[val => val && !isNaN(val) || 'API ID должен быть числом']"
-          />
-          <q-input
-            v-model="apiHash"
-            label="API Hash"
-            outlined
-            :rules="[val => val && val.length > 0 || 'Это поле обязательно']"
-          />
+          <div class="text-h6">
+            Устройство с таким названием уже существует. Вы не изменили имя устройства и оно будет перезаписано.
+          </div>
         </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Нет" color="negative" flat @click="cancelOverwrite" />
+          <q-btn label="Да" color="primary" flat @click="confirmOverwrite" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
-        <q-card-actions>
-          <q-btn label="Отмена" color="negative" @click="closeDialog" />
-          <q-btn
-            label="Создать"
-            color="primary"
-            @click="createNewSession"
-            :disable="!name || !appVersion || !langCode || !deviceModel || !systemVersion || !systemLangCode || !apiId || !apiHash"
-          />
+    <q-dialog v-model="deleteConfirmDialogOpen">
+      <q-card class="q-pa-md">
+        <q-card-section>
+          <div class="text-h6">
+            Вы действительно хотите удалить устройство?
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Нет" color="negative" flat @click="cancelDeleteDevice" />
+          <q-btn label="Да" color="primary" flat @click="confirmDeleteDevice" />
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
 </template>
 
-<style scoped>
-.q-pa-md {
-  padding: 20px;
-}
-</style>
