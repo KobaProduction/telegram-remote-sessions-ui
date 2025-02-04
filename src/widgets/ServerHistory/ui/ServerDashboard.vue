@@ -116,7 +116,7 @@ const getStatusIcon = (server: string) => {
 onMounted(() => {
   serversList.value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
   updateServerStatuses()
-  setInterval(updateServerStatuses, 5000)
+  setInterval(updateServerStatuses, 1000)
 })
 </script>
 
