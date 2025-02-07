@@ -9,10 +9,9 @@ export const useServerStore = defineStore('server', () => {
   const selectedServerApi = ref<TelegramRemoteSessionApi | null>(null)
   const lastConnectedServerUrl = ref(localStorage.getItem(STORAGE_KEY) || '')
 
-
   async function connectToServer(serverUrl: string, rememberServer: boolean = false) {
     try {
-      const api = new TelegramRemoteSessionApi(serverUrl)
+      const api = createApiInstance(serverUrl)
       const status = await api.getStatus()
 
       if (!status.status) {
@@ -36,7 +35,13 @@ export const useServerStore = defineStore('server', () => {
       console.error('Error connecting to server:', e)
     }
   }
-
+  const createApiInstance = (serverUrl: string): TelegramRemoteSessionApi => {
+    let url = serverUrl
+    if (!/^https?:\/\//.test(url)) {
+      url = `http://${url}`
+    }
+    return new TelegramRemoteSessionApi(url)
+  }
   function disconnectFromServer() {
     console.log('🔌 Disconnecting from the server')
     localStorage.removeItem(STORAGE_KEY)
@@ -54,5 +59,5 @@ export const useServerStore = defineStore('server', () => {
   restoreConnection().then()
   const api = computed(() => selectedServerApi.value instanceof TelegramRemoteSessionApi ? selectedServerApi.value : null)
 
-  return { isConnected, selectedServerApi, lastConnectedServerUrl, connectToServer, disconnectFromServer, api }
+  return { isConnected, selectedServerApi, lastConnectedServerUrl, connectToServer, disconnectFromServer, api, createApiInstance}
 })
