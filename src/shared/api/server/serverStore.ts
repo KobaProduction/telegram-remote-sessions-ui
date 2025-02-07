@@ -31,8 +31,8 @@ export const useServerStore = defineStore('server', () => {
       selectedServerApi.value = api
       isConnected.value = true
       return api
-    } catch (e) {
-      console.error('Error connecting to server:', e)
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Неизвестная ошибка')
     }
   }
   const createApiInstance = (serverUrl: string): TelegramRemoteSessionApi => {
