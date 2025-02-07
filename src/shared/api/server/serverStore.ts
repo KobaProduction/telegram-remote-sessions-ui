@@ -3,12 +3,17 @@ import { computed, ref } from 'vue'
 import { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 
 const STORAGE_KEY = 'lastConnectedServerUrl'
+const HISTORY_STORAGE_KEY = 'server_history'
 
 export const useServerStore = defineStore('server', () => {
   const isConnected = ref(false)
   const selectedServerApi = ref<TelegramRemoteSessionApi | null>(null)
   const lastConnectedServerUrl = ref(localStorage.getItem(STORAGE_KEY) || '')
+  const serverHistory = ref<string[]>(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]'))
 
+  const saveServerHistory = () => {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(serverHistory.value))
+  }
   async function connectToServer(serverUrl: string, rememberServer: boolean = false) {
     try {
       const api = createApiInstance(serverUrl)
@@ -18,13 +23,9 @@ export const useServerStore = defineStore('server', () => {
         return
       }
       console.log('✅ Successful connection to the server!:', serverUrl)
-      if (rememberServer) {
-        const storedServers = JSON.parse(localStorage.getItem('server_history') || '[]')
-        if (!storedServers.includes(serverUrl)) {
-          storedServers.push(serverUrl)
-          localStorage.setItem('server_history', JSON.stringify(storedServers))
-          console.log('Сервер был добавлен') //todo: update server_history in real time
-        }
+      if (rememberServer && !serverHistory.value.includes(serverUrl)) {
+        serverHistory.value.push(serverUrl)
+        saveServerHistory()
       }
 
       localStorage.setItem(STORAGE_KEY, serverUrl)
@@ -59,5 +60,14 @@ export const useServerStore = defineStore('server', () => {
   restoreConnection().then()
   const api = computed(() => selectedServerApi.value instanceof TelegramRemoteSessionApi ? selectedServerApi.value : null)
 
-  return { isConnected, selectedServerApi, lastConnectedServerUrl, connectToServer, disconnectFromServer, api, createApiInstance}
+  return {
+    isConnected,
+    selectedServerApi,
+    lastConnectedServerUrl,
+    connectToServer,
+    disconnectFromServer,
+    api,
+    createApiInstance,
+    saveServerHistory,
+    serverHistory}
 })
