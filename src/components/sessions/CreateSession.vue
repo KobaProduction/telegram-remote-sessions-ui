@@ -257,7 +257,6 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
               <q-input
                 v-model="sessionData.apiId"
                 label="API ID"
-                type="number"
                 outlined
                 class="q-mb-sm"
                 color="amber"
