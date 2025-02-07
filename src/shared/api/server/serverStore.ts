@@ -16,8 +16,6 @@ export const useServerStore = defineStore('server', () => {
       const status = await api.getStatus()
 
       if (!status.status) {
-
-        console.log('❌ Failed to connect to server:', serverUrl)
         return
       }
       console.log('✅ Successful connection to the server!:', serverUrl)
