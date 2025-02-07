@@ -26,9 +26,9 @@ const connect = async (serverURL: string, rememberServer: boolean) => {
   <div class="server-form">
     <p>Введите сервер</p>
     <q-input v-model="serverURL" label="Server URL" outlined />
+    <p v-if="error" class="text-red">{{ error }}</p>
     <q-checkbox v-model="rememberServer" label="Запомнить сервер?" class="q-mt-sm" />
     <q-btn @click="connect(serverURL, rememberServer)" color="primary" class="q-mt-md" :disable="!serverURL" >Подключиться</q-btn>
-    <p v-if="error" class="text-red">{{ error }}</p>
   </div>
 </template>
 
