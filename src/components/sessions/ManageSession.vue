@@ -33,7 +33,6 @@ const updateSessionHandler = async () => {
       const response: ApiResponse = e.response.data
       errorMessage.value = response.message
     }
-    // console.error('Ошибка при обновлении данных сессии:', errorMessage.value)
   }
 }
 
