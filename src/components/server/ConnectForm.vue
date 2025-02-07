@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useServerStore } from 'src/shared/api/server/serverStore'
+import type { AxiosError } from 'axios'
 
 const serverURL = ref(localStorage.getItem('savedServer') || '')
-const rememberServer = ref(false)
-const emit = defineEmits(['onConnect'])
+const rememberServer = ref<boolean>(false)
+const error = ref<string>('')
+const serverStore = useServerStore()
 
-const connect = () => {
-  emit('onConnect', serverURL.value, rememberServer.value)
+const connect = async (serverURL: string, rememberServer: boolean) => {
+  error.value = ''
+  try {
+    await serverStore.connectToServer(serverURL, rememberServer)
+  } catch (e) {
+    const axiosError = e as AxiosError
+    error.value = (axiosError.response?.data as {
+      message?: string
+    })?.message || axiosError.message || 'Неизвестная ошибка'
+  }
 }
+
 </script>
 
 <template>
@@ -15,14 +27,11 @@ const connect = () => {
     <p>Введите сервер</p>
     <q-input v-model="serverURL" label="Server URL" outlined />
     <q-checkbox v-model="rememberServer" label="Запомнить сервер?" class="q-mt-sm" />
-    <q-btn @click="connect" color="primary" class="q-mt-md">Подключиться</q-btn>
+    <q-btn @click="connect(serverURL, rememberServer)" color="primary" class="q-mt-md" :disable="!serverURL" >Подключиться</q-btn>
+    <p v-if="error" class="text-red">{{ error }}</p>
   </div>
 </template>
 
 <style scoped>
-.server-form {
-  max-width: 300px;
-  margin: auto;
-  text-align: center;
-}
+
 </style>

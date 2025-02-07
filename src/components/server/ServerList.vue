@@ -38,7 +38,7 @@ onMounted(loadServer)
   </div>
   <div v-else>
     <p>⚠️Server not selected</p>
-    <ConnectForm/>
+    <ConnectForm @onConnect="serverStore.connectToServer" />
   </div>
 </template>
 
