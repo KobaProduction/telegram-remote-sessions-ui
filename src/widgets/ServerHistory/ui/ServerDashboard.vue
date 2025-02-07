@@ -10,6 +10,7 @@ const serverStatuses = ref<Map<string, boolean>>(new Map())
 const newServer = ref<string | null>('')
 const editingIndex = ref<number | null>(null)
 const editedServer = ref<string>('')
+const addServerErrorMessage = ref<string>('')
 
 const itemsPerPage = 5
 const currentPage = ref(1)
@@ -33,8 +34,12 @@ const addServer = async () => {
   if (!newServer.value?.trim()) return
 
   const server = newServer.value.trim()
-  if (serversList.value.includes(server)) return
-
+  if (serversList.value.includes(server)){
+    addServerErrorMessage.value = "Сервер с таким URL уже существует"
+    return
+  }
+  const api = createApiInstance(server)
+  addServerErrorMessage.value = ''
   try {
     const api = createApiInstance(server)
     const status = await api.getStatus()
@@ -45,8 +50,12 @@ const addServer = async () => {
       newServer.value = null
       updateServerStatuses()
     }
-  } catch (error) {
-    console.error('Ошибка при проверке сервера:', error)
+  } catch (e) {
+      if (e instanceof Error) {
+      if (e?.message) {
+        addServerErrorMessage.value = e.message
+      }
+    }
   }
 }
 
@@ -139,6 +148,7 @@ onMounted(() => {
       label="Список серверов"
     >
       <q-card-section>
+        <p v-if="addServerErrorMessage" class="text-red">{{ addServerErrorMessage }}</p>
         <q-input v-model="newServer" label="Добавить сервер" outlined dense />
         <q-btn
           color="primary"
