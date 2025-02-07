@@ -10,6 +10,7 @@ const serverStatuses = ref<Map<string, boolean>>(new Map())
 const newServer = ref<string | null>('')
 const editingIndex = ref<number | null>(null)
 const editedServer = ref<string>('')
+const updateServerErrorMessage = ref<string>('Сервер не доступен')
 const addServerErrorMessage = ref<string>('')
 
 const itemsPerPage = 5
@@ -110,7 +111,6 @@ const updateServerStatuses = async () => {
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         statuses.set(server, false)
-        console.log("При обновлении статуса сервера:", server, "произошла ошибка:", error.message)
       }
     }
   }
@@ -189,6 +189,7 @@ onMounted(() => {
             </div>
           </q-item-section>
           <q-item-section side>
+            <p v-if="!serverStatuses.get(server)" class="text-red">{{ updateServerErrorMessage }}</p>
             <q-btn
               color="secondary"
               label="Подключиться"
