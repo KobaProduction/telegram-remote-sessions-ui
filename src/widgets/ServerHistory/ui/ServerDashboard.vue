@@ -42,7 +42,6 @@ const addServer = async () => {
   const api = createApiInstance(server)
   addServerErrorMessage.value = ''
   try {
-    const api = createApiInstance(server)
     const status = await api.getStatus()
 
     if (status.status === "ok") {
