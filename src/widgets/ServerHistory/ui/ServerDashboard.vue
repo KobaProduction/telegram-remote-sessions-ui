@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useServerStore } from 'src/shared/api/server/serverStore'
-import { TelegramRemoteSessionApi } from 'src/shared/api/trs'
 import { AxiosError } from 'axios'
 
 const STORAGE_KEY = 'server_history'
@@ -18,15 +17,6 @@ const currentPage = ref(1)
 const isExpanded = ref(false)
 const serverStore = useServerStore()
 
-
-const createApiInstance = (serverUrl: string): TelegramRemoteSessionApi => {
-  let url = serverUrl
-  if (!/^https?:\/\//.test(url)) {
-    url = `http://${url}`
-  }
-  return new TelegramRemoteSessionApi(url)
-}
-
 const saveToStorage = () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(serversList.value))
 }
@@ -39,7 +29,7 @@ const addServer = async () => {
     addServerErrorMessage.value = "Сервер с таким URL уже существует"
     return
   }
-  const api = createApiInstance(server)
+  const api = serverStore.createApiInstance(server)
   addServerErrorMessage.value = ''
   try {
     const status = await api.getStatus()
@@ -77,7 +67,7 @@ const saveEdit = async (index: number) => {
   const newServerUrl = editedServer.value.trim()
 
   try {
-    const api = createApiInstance(newServerUrl)
+    const api = serverStore.createApiInstance(newServerUrl)
     const status = await api.getStatus()
 
     if (status.status === 'ok') {
@@ -104,7 +94,7 @@ const updateServerStatuses = async () => {
   const statuses = new Map<string, boolean>()
   for (const server of serversList.value) {
     try {
-      const api = createApiInstance(server)
+      const api = serverStore.createApiInstance(server)
       const status = await api.getStatus()
       statuses.set(server, status.status === 'ok')
     } catch (error: unknown) {
