@@ -2,6 +2,7 @@
 import { ref, computed, defineProps } from 'vue'
 import { useRouter } from 'vue-router'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
+import HintedInput from 'src/shared/ui/input/HintedInput.vue'
 
 interface SessionData {
   name: string
@@ -221,15 +222,12 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
                 outlined
                 class="q-mb-sm"
               />
-              <q-input
+              <HintedInput
                 v-model="sessionData.appVersion"
                 label="Версия приложения"
-                outlined
                 class="q-mb-sm"
-                color="amber"
                 hint="Внимание! Используйте актуальную версию telegram. Иначе шанс бана выше!."
-                hide-bottom-space
-              />
+              ></HintedInput>
               <q-input
                 v-model="sessionData.langCode"
                 label="Язык"
@@ -254,16 +252,7 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
                 outlined
                 class="q-mb-sm"
               />
-              <q-input
-                v-model="sessionData.apiId"
-                label="API ID"
-                outlined
-                class="q-mb-sm"
-                color="amber"
-                hint="Внимание! При использовании app_id из официального приложений телеграм - вероятность получить блокировку выше. При неверном app_id авторизация сессии может не произойти или привести к проблемам со стороны телеграм"
-                persistent-hint
-                hide-bottom-space
-              />
+              <HintedInput v-model="sessionData.apiId" label="API ID" hint="Используйте корректный API ID." class="q-mb-sm"/>
               <q-input
                 v-model="sessionData.apiHash"
                 label="API Hash"
