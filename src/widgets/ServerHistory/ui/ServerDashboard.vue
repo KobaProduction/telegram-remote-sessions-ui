@@ -4,7 +4,7 @@ import { useServerStore } from 'src/shared/api/server/serverStore'
 import { AxiosError } from 'axios'
 
 const serverStatuses = ref<Map<string, boolean>>(new Map())
-const newServer = ref<string | null>('')
+const newServerURL = ref<string | null>('')
 const editingIndex = ref<number | null>(null)
 const editedServer = ref<string>('')
 const updateServerErrorMessage = ref<string>('Сервер не доступен')
@@ -37,9 +37,9 @@ const getStatusIcon = (server: string) => {
 }
 
 const addServer = async () => {
-  if (!newServer.value?.trim()) return
+  if (!newServerURL.value?.trim()) return
 
-  const server = newServer.value.trim()
+  const server = newServerURL.value.trim()
   if (serverStore.serverHistory.includes(server)){
     addServerErrorMessage.value = "Сервер с таким URL уже существует"
     return
@@ -52,7 +52,7 @@ const addServer = async () => {
     if (status.status === "ok") {
       serverStore.serverHistory.push(server)
       serverStore.saveServerHistory()
-      newServer.value = null
+      newServerURL.value = null
       updateServerStatuses()
     }
   } catch (e) {
@@ -130,7 +130,7 @@ onMounted(() => {
     >
       <q-card-section>
         <p v-if="addServerErrorMessage" class="text-red">{{ addServerErrorMessage }}</p>
-        <q-input v-model="newServer" label="Добавить сервер" outlined dense />
+        <q-input v-model="newServerURL" label="Добавить сервер" outlined dense />
         <q-btn
           color="primary"
           label="Добавить"
