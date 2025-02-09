@@ -97,6 +97,10 @@ const saveEdit = async (index: number) => {
   editingIndex.value = null
 }
 
+function clearLocalStorage (){
+  localStorage.clear()
+}
+
 const maxPages = computed(() => Math.ceil(serverStore.serverHistory.length / itemsPerPage))
 
 const paginatedServers = computed(() => {
@@ -112,6 +116,12 @@ onMounted(() => {
 </script>
 
 <template>
+  <q-btn
+    @click="clearLocalStorage()"
+    label="Clear all saved data"
+    color="secondary"
+    class="absolute-top"
+  ></q-btn>
   <q-card class="q-pa-md" style="min-width: 450px; max-width: 450px">
     <q-banner v-if="serverStore.isConnected" class="q-mb-md">
       <div class="text-h6">Connected to server: {{ serverStore.lastConnectedServerUrl }}</div>
