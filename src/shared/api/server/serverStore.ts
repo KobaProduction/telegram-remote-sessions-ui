@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
+import { Notify } from 'quasar'
 
 const STORAGE_KEY = 'lastConnectedServerUrl'
 const HISTORY_STORAGE_KEY = 'server_history'
@@ -22,7 +23,11 @@ export const useServerStore = defineStore('server', () => {
       if (!status.status) {
         return
       }
-      console.log('✅ Successful connection to the server!:', serverUrl)
+      Notify.create({
+        message: `✅ Successful connection to the server!: ${serverUrl}`,
+        timeout: 1000,
+        progress: true,
+      })
       if (rememberServer && !serverHistory.value.includes(serverUrl)) {
         serverHistory.value.push(serverUrl)
         saveServerHistory()
@@ -44,7 +49,13 @@ export const useServerStore = defineStore('server', () => {
     return new TelegramRemoteSessionApi(url)
   }
   function disconnectFromServer() {
-    console.log('🔌 Disconnecting from the server')
+    Notify.create({
+      message: `Disconnected from the server!`,
+      color: 'red',
+      position: 'bottom',
+      timeout: 1000,
+      progress: true,
+    })
     localStorage.removeItem(STORAGE_KEY)
     selectedServerApi.value = null
     isConnected.value = false

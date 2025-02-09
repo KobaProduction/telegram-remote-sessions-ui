@@ -55,6 +55,13 @@ const addServer = async () => {
       serverStore.saveServerHistory()
       newServerURL.value = null
       updateServerStatuses()
+      Notify.create({
+        message: `Сервер успешно добавлен!`,
+        color: 'green',
+        position: 'bottom',
+        timeout: 1000,
+        progress: true,
+      })
     }
   } catch (e) {
     if (e instanceof Error) {
@@ -66,9 +73,17 @@ const addServer = async () => {
 }
 
 const removeServer = (index: number) => {
+  const removedServerUrl = serverStore.serverHistory[index]
   serverStore.serverHistory.splice(index, 1)
   serverStore.saveServerHistory()
   updateServerStatuses()
+  Notify.create({
+    message: `The server is successfully removed! URL: ${removedServerUrl}`,
+    color: 'red',
+    position: 'bottom',
+    timeout: 1000,
+    progress: true,
+  })
 }
 
 const editServer = (index: number) => {
@@ -162,6 +177,7 @@ onMounted(() => {
           @click="addServer"
           class="q-mt-sm"
           size="sm"
+          :disabled="!newServerURL"
         />
       </q-card-section>
 
