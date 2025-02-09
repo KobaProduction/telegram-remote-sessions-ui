@@ -148,8 +148,14 @@ onMounted(() => {
       label="Список серверов"
     >
       <q-card-section>
-        <p v-if="addServerErrorMessage" class="text-red">{{ addServerErrorMessage }}</p>
-        <q-input v-model="newServerURL" label="Добавить сервер" outlined dense />
+        <q-input
+          v-model="newServerURL"
+          label="Добавить сервер"
+          outlined
+          dense
+          :error="!!addServerErrorMessage"
+          :error-message="addServerErrorMessage"
+        />
         <q-btn
           color="primary"
           label="Добавить"
