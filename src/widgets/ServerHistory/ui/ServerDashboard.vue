@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useServerStore } from 'src/shared/api/server/serverStore'
+import { Notify } from 'quasar'
 import { AxiosError } from 'axios'
 
 const serverStatuses = ref<Map<string, boolean>>(new Map())
@@ -90,8 +91,16 @@ const saveEdit = async (index: number) => {
       serverStore.saveServerHistory()
       await updateServerStatuses()
     }
-  } catch (error) {
-    console.error('Ошибка при проверке сервера:', error)
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e?.message) {
+        Notify.create({
+          message: `Ошибка при редактировании сервера ${e.message}`,
+          color: 'red',
+          position: 'top'
+        })
+      }
+    }
   }
 
   editingIndex.value = null
