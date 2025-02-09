@@ -9,9 +9,9 @@ const props = defineProps({
   label: String,
   type: {
     type: String,
-    default: 'text',
+    default: 'text'
   },
-  hint: String,
+  hint: String
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -27,17 +27,30 @@ const showHint = computed(() => isFocused.value && props.hint)
 </script>
 
 <template>
-  <q-input
-    v-model="inputValue"
-    :label="label"
-    :hint="showHint ? props.hint : ''"
-    outlined
-    @focus="isFocused = true"
-    @blur="isFocused = false"
-    hide-bottom-space
-    color="amber"
-  />
+  <div class="q-pa-none">
+    <q-input
+      v-model="inputValue"
+      :label="label"
+      outlined
+      @focus="isFocused = true"
+      @blur="isFocused = false"
+      color="amber"
+      class="q-mb-sm"
+    />
+    <transition name="hint-fade">
+      <div v-if="showHint" class="q-mt-sm text-body2">{{ props.hint }}</div>
+    </transition>
+  </div>
 </template>
 
 <style scoped>
+.hint-fade-enter-active,
+.hint-fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.hint-fade-enter-from,
+.hint-fade-leave-to {
+  opacity: 0;
+}
 </style>
