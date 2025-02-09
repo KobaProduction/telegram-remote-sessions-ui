@@ -226,7 +226,7 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
                 v-model="sessionData.appVersion"
                 label="Версия приложения"
                 class="q-mb-sm"
-                hint="Внимание! Используйте актуальную версию telegram. Иначе шанс бана выше!."
+                hint="Внимание! Используйте актуальную версию telegram!"
               ></HintedInput>
               <q-input
                 v-model="sessionData.langCode"
