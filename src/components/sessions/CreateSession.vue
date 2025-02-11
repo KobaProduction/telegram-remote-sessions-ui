@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, defineProps } from 'vue'
-import { useRouter } from 'vue-router'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import HintedInput from 'src/shared/ui/input/HintedInput.vue'
+import { AxiosError } from 'axios'
 
 interface SessionData {
   name: string
@@ -22,13 +22,14 @@ interface Device {
 }
 
 const props = defineProps<{ api: TelegramRemoteSessionApi }>()
-const router = useRouter()
 
 const isDialogOpen = ref(false)
 const devices = ref<Device[]>(JSON.parse(localStorage.getItem('devices') || '[]') as Device[])
 const isEditingDevice = ref(false)
 const originalDeviceName = ref<string | null>(null)
 const viewDevices = ref<boolean>(false)
+const createSessionError = ref<string>('')
+
 const sessionData = ref<SessionData>({
   name: '',
   appVersion: '',
@@ -71,7 +72,7 @@ const closeDialog = () => {
     deviceModel: '',
     systemVersion: '',
     systemLangCode: '',
-    apiId: 0,
+    apiId: 1,
     apiHash: '',
     sessionName: ''
   }
@@ -82,6 +83,7 @@ const cancelAction = () => {
     isEditingDevice.value = false
     originalDeviceName.value = null
   }
+  createSessionError.value = ''
   closeDialog()
 }
 
@@ -161,6 +163,10 @@ const cancelDeleteDevice = () => {
   deleteConfirmDialogOpen.value = false
 }
 
+const emit = defineEmits<{
+  (event: 'sessionCreated', sessionName: string): void
+}>()
+
 const createNewSession = async () => {
   try {
     const requestData = {
@@ -175,14 +181,13 @@ const createNewSession = async () => {
       session_name: sessionData.value.sessionName
     }
 
-    const result = await props.api.createSession(sessionData.value.name, requestData)
-
-    if (result.status) {
-      closeDialog()
-      await router.push('/sessions')
-    }
+    await props.api.createSession(sessionData.value.name, requestData)
+    emit('sessionCreated', sessionData.value.name)
+    closeDialog()
   } catch (error) {
-    console.error('Ошибка при создании сессии:', error)
+    if (error instanceof AxiosError) {
+      createSessionError.value = error.message
+    }
   }
 }
 
@@ -275,6 +280,9 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
                 <q-btn label="Сохранить устройство" color="secondary" @click="saveDevice" />
               </q-btn-group>
             </q-card-actions>
+            <div v-if="createSessionError" class="text-red flex justify-center items-center text-center">
+              {{ createSessionError }}
+            </div>
           </div>
 
           <div v-if="viewDevices" class="col-12" style="">
