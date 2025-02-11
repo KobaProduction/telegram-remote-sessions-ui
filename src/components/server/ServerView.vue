@@ -40,7 +40,7 @@ async function checkConnection() {
       showErrorModal.value = false
       fetchSessions()
     } else {
-      throw new Error('Server not responding properly')
+      new Error('Server not responding properly')
     }
   } catch (error) {
     console.log(error)
