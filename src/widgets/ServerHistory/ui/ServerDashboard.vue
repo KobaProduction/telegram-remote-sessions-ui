@@ -65,7 +65,7 @@ const addServer = async () => {
       })
     }
   } catch (e) {
-    if (e instanceof Error) {
+    if (e instanceof AxiosError) {
       if (e?.message) {
         addServerErrorMessage.value = e.message
       }
