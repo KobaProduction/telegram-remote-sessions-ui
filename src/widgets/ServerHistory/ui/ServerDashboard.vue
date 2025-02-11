@@ -8,6 +8,7 @@ const serverStatuses = ref<Map<string, boolean>>(new Map())
 const newServerURL = ref<string | null>('')
 const editingIndex = ref<number | null>(null)
 const editedServer = ref<string>('')
+const editedServerError = ref<string>('')
 const updateServerErrorMessage = ref<string>('Сервер не доступен')
 const addServerErrorMessage = ref<string>('')
 
@@ -23,7 +24,7 @@ const updateServerStatuses = async () => {
       const api = serverStore.createApiInstance(server)
       const status = await api.getStatus()
       statuses.set(server, status.status === 'ok')
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof AxiosError) {
         statuses.set(server, false)
       }
@@ -105,20 +106,17 @@ const saveEdit = async (index: number) => {
       serverStore.serverHistory[index] = newServerUrl
       serverStore.saveServerHistory()
       await updateServerStatuses()
+      editingIndex.value = null
     }
-  } catch (e) {
-    if (e instanceof Error) {
-      if (e?.message) {
-        Notify.create({
-          message: `Ошибка при редактировании сервера ${e.message}`,
-          color: 'red',
-          position: 'top'
-        })
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      if (error?.message) {
+        console.log(error)
+        editedServerError.value = error.message
       }
     }
   }
 
-  editingIndex.value = null
 }
 
 function clearLocalStorage (){
@@ -206,6 +204,8 @@ onMounted(() => {
                 autofocus
                 @keyup.enter="saveEdit(index)"
                 style="flex-grow: 1;"
+                :error="!!editedServerError"
+                :error-message="editedServerError"
               />
               <q-item-label v-else style="flex-grow: 1;">{{ server }}</q-item-label>
             </div>
