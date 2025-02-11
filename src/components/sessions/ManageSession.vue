@@ -116,18 +116,20 @@ onMounted(fetchSessionDetails)
         />
       </div>
 
-      <!-- Прокси -->
       <div>
-        <q-input v-model="sessionDetails.proxy" label="Proxy" dense />
+        <q-input
+          v-model="sessionDetails.proxy"
+          label="Proxy" dense
+          :error="!!errorMessage"
+          :error-message="errorMessage"
+        />
       </div>
-      <p v-if="errorMessage" class="text-red">{{ errorMessage }}</p>
-      <!-- Кнопки сохранения и удаления -->
+
       <div class="q-mt-md q-gutter-sm" style="display: flex; justify-content: space-between">
         <q-btn :label="'Сохранить'" color="positive" @click="updateSessionHandler" />
         <q-btn label="Удалить" color="negative" @click="deleteSessionHandler" />
       </div>
 
-      <!-- Кнопка закрытия -->
       <q-btn label="Закрыть" color="primary" @click="emit('close')" class="q-mt-md" />
     </q-card-section>
   </q-card>
