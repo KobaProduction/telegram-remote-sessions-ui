@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import SessionList from 'components/sessions/SessionList.vue'
-import CreateSessionButton from 'components/sessions/CreateSession.vue'
 import type { SessionListResponse } from 'src/shared/api/trs/model'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import { useServerStore } from 'src/shared/api/server/serverStore'
+import CreateSession from 'components/sessions/CreateSession.vue'
 
 const sessions = ref<string[] | null>(null)
 const error = ref<string>('')
@@ -75,7 +75,7 @@ onMounted(() => {
 
 <template>
   <div class="column">
-    <CreateSessionButton @sessionCreated="fetchSessions" :api="props.api"></CreateSessionButton>
+    <CreateSession @sessionCreated="fetchSessions" :api="props.api"></CreateSession>
     <div v-if="sessions" class="col self-center">
       <SessionList :sessions="sessions" :api="props.api" />
     </div>
