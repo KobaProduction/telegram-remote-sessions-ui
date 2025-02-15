@@ -91,7 +91,7 @@ const closeSession = () => {
           <q-card-section class="q-pa-none q-ml-auto">
             <q-card-actions align="center">
               <q-btn
-                label="edit"
+                label="open"
                 color="secondary"
                 @click="openSession(session)"
               />
