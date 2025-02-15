@@ -37,7 +37,7 @@ const sessionData = ref<SessionData>({
   deviceModel: '',
   systemVersion: '',
   systemLangCode: '',
-  apiId: 0,
+  apiId: 1,
   apiHash: '',
   sessionName: ''
 })
