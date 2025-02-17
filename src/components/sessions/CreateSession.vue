@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, defineProps } from 'vue'
+import { ref, computed } from 'vue'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import HintedInput from 'src/shared/ui/input/HintedInput.vue'
 import { AxiosError } from 'axios'
@@ -29,8 +29,7 @@ const isEditingDevice = ref(false)
 const originalDeviceName = ref<string | null>(null)
 const viewDevices = ref<boolean>(false)
 const createSessionError = ref<string>('')
-
-const sessionData = ref<SessionData>({
+const defaultSessionData = {
   name: '',
   appVersion: '',
   langCode: '',
@@ -40,7 +39,9 @@ const sessionData = ref<SessionData>({
   apiId: 1,
   apiHash: '',
   sessionName: ''
-})
+}
+
+const sessionData = ref<SessionData>(structuredClone(defaultSessionData))
 
 const currentPage = ref(1)
 const rowsPerPage = ref(5)
@@ -65,17 +66,7 @@ const closeDialog = () => {
   isDialogOpen.value = false
   isEditingDevice.value = false
   originalDeviceName.value = null
-  sessionData.value = {
-    name: '',
-    appVersion: '',
-    langCode: '',
-    deviceModel: '',
-    systemVersion: '',
-    systemLangCode: '',
-    apiId: 1,
-    apiHash: '',
-    sessionName: ''
-  }
+  sessionData.value = structuredClone(defaultSessionData)
 }
 
 const cancelAction = () => {
