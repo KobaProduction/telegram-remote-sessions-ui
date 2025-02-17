@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -18,6 +18,10 @@ const emit = defineEmits(['update:modelValue'])
 const isFocused = ref(false)
 
 const inputValue = ref(props.modelValue)
+
+watch(() => props.modelValue, (newVal) => {
+  inputValue.value = newVal
+})
 
 watch(inputValue, (newVal) => {
   emit('update:modelValue', newVal)
