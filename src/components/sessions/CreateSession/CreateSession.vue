@@ -3,23 +3,7 @@ import { ref, computed } from 'vue'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import HintedInput from 'src/shared/ui/input/HintedInput.vue'
 import { AxiosError } from 'axios'
-
-interface SessionData {
-  name: string
-  appVersion: string
-  langCode: string
-  deviceModel: string
-  systemVersion: string
-  systemLangCode: string
-  apiId: number
-  apiHash: string
-  sessionName: string
-}
-
-interface Device {
-  deviceName: string
-  data: SessionData
-}
+import type { Device, SessionData } from './model'
 
 const props = defineProps<{ api: TelegramRemoteSessionApi }>()
 
@@ -42,6 +26,9 @@ const defaultSessionData = {
 }
 
 const sessionData = ref<SessionData>(structuredClone(defaultSessionData))
+
+const deviceNameModalOpen = ref(false)
+const deviceNameInput = ref('')
 
 const currentPage = ref(1)
 const rowsPerPage = ref(5)
@@ -80,34 +67,56 @@ const cancelAction = () => {
 
 const saveDevice = () => {
   if (isEditingDevice.value) {
-    if (originalDeviceName.value !== null) {
-      const index = devices.value.findIndex(d => d.deviceName === originalDeviceName.value)
-      if (index !== -1) {
-        devices.value[index] = { deviceName: sessionData.value.name, data: { ...sessionData.value } }
-        localStorage.setItem('devices', JSON.stringify(devices.value))
-      }
-      originalDeviceName.value = null
-    }
-    isEditingDevice.value = false
+    saveDeviceData()
+  } else {
+    deviceNameModalOpen.value = true
+  }
+}
+
+const confirmDeviceName = () => {
+  if (!deviceNameInput.value.trim()) {
+    createSessionError.value = 'Название устройства не может быть пустым'
     return
   }
 
-  const existingIndex = devices.value.findIndex(d => d.deviceName === sessionData.value.name)
-  if (existingIndex !== -1) {
+  const existingIndex = devices.value.findIndex(d => d.deviceName === deviceNameInput.value)
+  if (existingIndex !== -1 && !isEditingDevice.value) {
     pendingOverwriteIndex.value = existingIndex
     overwriteDialogOpen.value = true
-    return
+  } else {
+    saveDeviceData()
+  }
+}
+
+const saveDeviceData = () => {
+  const { ...deviceData } = sessionData.value
+
+  if (isEditingDevice.value && originalDeviceName.value !== null) {
+    const index = devices.value.findIndex(d => d.deviceName === originalDeviceName.value)
+    if (index !== -1) {
+      devices.value[index] = {
+        deviceName: deviceNameInput.value,
+        data: deviceData
+      }
+    }
+  } else {
+    devices.value.push({
+      deviceName: deviceNameInput.value,
+      data: deviceData
+    })
   }
 
-  devices.value.push({ deviceName: sessionData.value.name, data: { ...sessionData.value } })
   localStorage.setItem('devices', JSON.stringify(devices.value))
+  deviceNameModalOpen.value = false
+  deviceNameInput.value = ''
 }
 
 const confirmOverwrite = () => {
   if (pendingOverwriteIndex.value !== null) {
+    const { ...deviceData } = sessionData.value
     devices.value[pendingOverwriteIndex.value] = {
-      deviceName: sessionData.value.name,
-      data: { ...sessionData.value }
+      deviceName: deviceNameInput.value,
+      data: deviceData
     }
     localStorage.setItem('devices', JSON.stringify(devices.value))
     pendingOverwriteIndex.value = null
@@ -121,16 +130,39 @@ const cancelOverwrite = () => {
 }
 
 const loadDevice = (device: Device) => {
-  sessionData.value = { ...device.data }
-  isEditingDevice.value = false
-  originalDeviceName.value = null
+  sessionData.value = {
+    ...sessionData.value,
+    name: '',
+    appVersion: device.data.appVersion,
+    langCode: device.data.langCode,
+    deviceModel: device.data.deviceModel,
+    systemVersion: device.data.systemVersion,
+    systemLangCode: device.data.systemLangCode,
+    apiId: device.data.apiId,
+    apiHash: device.data.apiHash,
+    sessionName: ''
+  }
+  console.log(device.data.appVersion)
+  createSessionError.value = `Используется устройство: ${device.deviceName}`
 }
 
 const editDevice = (index: number) => {
   const device = devices.value[index]
   if (!device) return
   originalDeviceName.value = device.deviceName
-  sessionData.value = { ...device.data }
+  deviceNameInput.value = device.deviceName
+  sessionData.value = {
+    ...sessionData.value,
+    name: '', // всегда очищаем имя сессии
+    appVersion: device.data.appVersion,
+    langCode: device.data.langCode,
+    deviceModel: device.data.deviceModel,
+    systemVersion: device.data.systemVersion,
+    systemLangCode: device.data.systemLangCode,
+    apiId: device.data.apiId,
+    apiHash: device.data.apiHash,
+    sessionName: ''
+  }
   isEditingDevice.value = true
 }
 
@@ -182,22 +214,18 @@ const createNewSession = async () => {
   }
 }
 
-
 const headerText = computed(() => isEditingDevice.value ? 'Редактирование устройства' : 'Создать новую сессию')
 
 const sessionNameLabel = computed(() =>
   isEditingDevice.value ? `Название устройства (${sessionData.value.name})` : 'Название сессии'
 )
-
-const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя сессии' : '')
 </script>
-
 
 <template>
   <div class="col self-center q-pa-md">
     <q-btn @click="openDialog" color="primary" label="Создать сессию" class="q-mt-md" />
 
-    <q-dialog v-model="isDialogOpen" >
+    <q-dialog v-model="isDialogOpen">
       <q-card class="modal-card">
         <div class="row">
           <div class="col-12">
@@ -211,19 +239,12 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
                 outlined
                 class="q-mb-sm"
               />
-              <q-input
-                v-if="isEditingDevice"
-                v-model="sessionData.sessionName"
-                :label="sessionEditNameLabel"
-                outlined
-                class="q-mb-sm"
-              />
               <HintedInput
                 v-model="sessionData.appVersion"
                 label="Версия приложения"
                 class="q-mb-sm"
                 hint="Внимание! Используйте актуальную версию telegram!"
-              ></HintedInput>
+              />
               <q-input
                 v-model="sessionData.langCode"
                 label="Язык"
@@ -259,7 +280,6 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
             <q-card-actions align="right">
               <q-toggle v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
               <q-btn-group flat unelevated>
-
                 <q-btn label="Выйти" color="negative" @click="cancelAction" />
                 <q-btn
                   v-if="!isEditingDevice"
@@ -276,7 +296,7 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
             </div>
           </div>
 
-          <div v-if="viewDevices" class="col-12" style="">
+          <div v-if="viewDevices" class="col-12">
             <q-card-section>
               <div class="row items-center justify-between q-mb-sm">
                 <h6 class="q-ma-none">Девайсы</h6>
@@ -323,6 +343,28 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
       </q-card>
     </q-dialog>
 
+    <q-dialog v-model="deviceNameModalOpen" persistent>
+      <q-card style="min-width: 300px">
+        <q-card-section>
+          <div class="text-h6">Введите название устройства</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-input
+            v-model="deviceNameInput"
+            label="Название устройства"
+            autofocus
+            @keyup.enter="confirmDeviceName"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Отмена" color="negative" @click="deviceNameModalOpen = false" />
+          <q-btn flat label="Сохранить" color="primary" @click="confirmDeviceName" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <q-dialog v-model="overwriteDialogOpen">
       <q-card class="q-pa-md">
         <q-card-section>
@@ -352,4 +394,3 @@ const sessionEditNameLabel = computed(() => isEditingDevice.value ? 'Имя се
     </q-dialog>
   </div>
 </template>
-

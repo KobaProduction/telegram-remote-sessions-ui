@@ -4,7 +4,7 @@ import SessionList from 'components/sessions/SessionList.vue'
 import type { SessionListResponse } from 'src/shared/api/trs/model'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import { useServerStore } from 'src/shared/api/server/serverStore'
-import CreateSession from 'components/sessions/CreateSession.vue'
+import CreateSession from 'components/sessions/CreateSession/CreateSession.vue'
 
 const sessions = ref<string[] | null>(null)
 const error = ref<string>('')
