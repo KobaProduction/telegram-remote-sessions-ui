@@ -46,6 +46,27 @@ const deleteSessionHandler = async () => {
   }
 }
 
+// async function checkProxy(proxy: string | null) {
+//   if (!proxy) return;
+//   console.log(`Проверяю прокси: ${proxy}`);
+//
+//   try {
+//     const agent = new SocksProxyAgent(proxy);
+//
+//     const response = await axios.request({
+//       url: 'https://api.ipify.org?format=json',
+//       httpAgent: agent,  // для http
+//       httpsAgent: agent  // для https
+//     });
+//
+//     console.log('IP:', response.data.ip);
+//   } catch (error) {
+//     if (error instanceof AxiosError) {
+//       console.error('Ошибка:', error.message);
+//     }
+//   }
+// }
+
 onMounted(fetchSessionDetails)
 </script>
 
@@ -59,6 +80,18 @@ onMounted(fetchSessionDetails)
           label="Статус активности"
           dense
         />
+      <q-select
+        v-model="sessionDetails.is_authenticated"
+        label="is authenticated"
+        dense
+        disable
+      />
+      <q-select
+        v-model="sessionDetails.is_broken"
+        label="is broken"
+        dense
+        disable
+      />
         <q-input
           v-model="sessionDetails.session_parameters.app_version"
           label="Версия приложения"
@@ -98,7 +131,11 @@ onMounted(fetchSessionDetails)
           :error="!!errorMessage"
           :error-message="errorMessage"
         />
-      </div>
+<!--        <q-btn-->
+<!--          @click="checkProxy(sessionDetails.proxy)"-->
+<!--          label="Check"-->
+<!--          :disable="!sessionDetails.proxy"-->
+<!--        />-->
 
       <div class="q-mt-md q-gutter-sm flex fa-shuttle-space" style=" justify-content: space-between">
         <q-btn :label="'Сохранить'" color="positive" @click="updateSessionHandler" />
