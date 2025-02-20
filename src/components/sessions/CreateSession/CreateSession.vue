@@ -153,7 +153,7 @@ const editDevice = (index: number) => {
   deviceNameInput.value = device.deviceName
   sessionData.value = {
     ...sessionData.value,
-    name: '', // всегда очищаем имя сессии
+    name: '',
     appVersion: device.data.appVersion,
     langCode: device.data.langCode,
     deviceModel: device.data.deviceModel,
@@ -233,49 +233,44 @@ const sessionNameLabel = computed(() =>
               <div class="row items-center">
                 <h6 class="q-ma-none">{{ headerText }}</h6>
               </div>
-              <q-input
+              <HintedInput
                 v-model="sessionData.name"
                 :label="sessionNameLabel"
-                outlined
-                class="q-mb-sm"
+                hint=""
               />
               <HintedInput
                 v-model="sessionData.appVersion"
                 label="Версия приложения"
-                class="q-mb-sm"
-                hint="Внимание! Используйте актуальную версию telegram!"
+                hint="Attention! Use actual telegram version!"
               />
-              <q-input
+              <HintedInput
                 v-model="sessionData.langCode"
                 label="Язык"
-                outlined
-                class="q-mb-sm"
+                hint="Attention! Use real lang code like en, kz, ru"
               />
-              <q-input
+              <HintedInput
                 v-model="sessionData.deviceModel"
                 label="Модель устройства"
-                outlined
-                class="q-mb-sm"
               />
-              <q-input
+              <HintedInput
                 v-model="sessionData.systemVersion"
                 label="Версия системы"
-                outlined
-                class="q-mb-sm"
               />
-              <q-input
+              <HintedInput
                 v-model="sessionData.systemLangCode"
                 label="Язык системы"
-                outlined
-                class="q-mb-sm"
               />
-              <HintedInput v-model="sessionData.apiId" label="API ID" hint="Используйте корректный API ID." class="q-mb-sm"/>
-              <q-input
+              <HintedInput
+                v-model="sessionData.apiId"
+                label="API ID"
+                hint="Attention! Use correct API ID from https://my.telegram.org/apps."
+              />
+              <p> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
+              <HintedInput
                 v-model="sessionData.apiHash"
                 label="API Hash"
-                outlined
-                class="q-mb-sm"
               />
+              <p> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
             </q-card-section>
             <q-card-actions align="right">
               <q-toggle v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
