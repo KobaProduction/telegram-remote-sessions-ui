@@ -42,15 +42,18 @@ const showHint = computed(() => isFocused.value && props.hint)
       class="q-mb-sm"
     />
     <transition name="hint-fade">
-      <div v-if="showHint" class="q-mt-sm text-body2">{{ props.hint }}</div>
+      <div v-if="showHint" class="q-mt-sm text-caption">{{ props.hint }}</div>
     </transition>
   </div>
 </template>
 
 <style scoped>
-.hint-fade-enter-active,
-.hint-fade-leave-active {
+.hint-fade-enter-active {
   transition: opacity 0.5s;
+}
+
+.hint-fade-leave-active {
+  transition: opacity 0.1s;
 }
 
 .hint-fade-enter-from,
