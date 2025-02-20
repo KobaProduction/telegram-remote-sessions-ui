@@ -31,14 +31,14 @@ const showHint = computed(() => isFocused.value && props.hint)
 </script>
 
 <template>
-  <div class="q-pa-none">
+  <div class="q-mb-sm">
     <q-input
       v-model="inputValue"
       :label="label"
       outlined
       @focus="isFocused = true"
       @blur="isFocused = false"
-      color="amber"
+      color="secondary"
       class="q-mb-sm"
     />
     <transition name="hint-fade">
