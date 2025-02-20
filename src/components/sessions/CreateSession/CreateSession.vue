@@ -236,7 +236,7 @@ const sessionNameLabel = computed(() =>
               <HintedInput
                 v-model="sessionData.name"
                 :label="sessionNameLabel"
-                hint=""
+                hint="Use only English letters and numbers (max 15 characters)."
               />
               <HintedInput
                 v-model="sessionData.appVersion"
@@ -251,26 +251,30 @@ const sessionNameLabel = computed(() =>
               <HintedInput
                 v-model="sessionData.deviceModel"
                 label="Device model"
+                hint="Use your device model, for example: POCO C51, HP Laptop 15-dw1xxx"
               />
               <HintedInput
                 v-model="sessionData.systemVersion"
                 label="System version"
+                hint="Use the version of your system, for example: Windows 11, Android 12"
               />
               <HintedInput
                 v-model="sessionData.systemLangCode"
                 label="Device language"
+                hint="Use the language of your system, for example: en, ru, kz"
               />
               <HintedInput
                 v-model="sessionData.apiId"
                 label="API ID"
                 hint="Attention! Use correct API ID from https://my.telegram.org/apps."
               />
-              <p> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
+              <p class="text-caption"> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
               <HintedInput
                 v-model="sessionData.apiHash"
                 label="API Hash"
+                hint="Attention! Use correct API Hash from https://my.telegram.org/apps."
               />
-              <p> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
+              <p class="text-caption"> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
             </q-card-section>
             <q-card-actions align="right">
               <q-toggle v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
