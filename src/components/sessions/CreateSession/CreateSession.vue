@@ -217,7 +217,7 @@ const createNewSession = async () => {
 const headerText = computed(() => isEditingDevice.value ? 'Редактирование устройства' : 'Создать новую сессию')
 
 const sessionNameLabel = computed(() =>
-  isEditingDevice.value ? `Название устройства (${sessionData.value.name})` : 'Название сессии'
+  isEditingDevice.value ? `Device name (${sessionData.value.name})` : 'Session name'
 )
 </script>
 
@@ -240,25 +240,25 @@ const sessionNameLabel = computed(() =>
               />
               <HintedInput
                 v-model="sessionData.appVersion"
-                label="Версия приложения"
+                label="App version"
                 hint="Attention! Use actual telegram version!"
               />
               <HintedInput
                 v-model="sessionData.langCode"
-                label="Язык"
+                label="Language"
                 hint="Attention! Use real lang code like en, kz, ru"
               />
               <HintedInput
                 v-model="sessionData.deviceModel"
-                label="Модель устройства"
+                label="Device model"
               />
               <HintedInput
                 v-model="sessionData.systemVersion"
-                label="Версия системы"
+                label="System version"
               />
               <HintedInput
                 v-model="sessionData.systemLangCode"
-                label="Язык системы"
+                label="Device language"
               />
               <HintedInput
                 v-model="sessionData.apiId"
