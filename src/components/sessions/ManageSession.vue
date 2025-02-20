@@ -8,9 +8,11 @@ const props = defineProps<{ sessionName: string; api: TelegramRemoteSessionApi }
 const emit = defineEmits(['close'])
 
 const sessionDetails = ref<Session | null>(null)
-const isActiveSelected = ref<boolean>(true) // по умолчанию
-const isActiveOptions = ['true', 'false']
-
+const isActiveSelected = ref<boolean>(true)
+const isActiveOptions = [
+  { label: 'Active', value: true },
+  { label: 'Inactive', value: false }
+]
 const errorMessage = ref<string>('')
 
 async function fetchSessionDetails() {
@@ -71,82 +73,102 @@ onMounted(fetchSessionDetails)
 </script>
 
 <template>
-  <q-card v-if="sessionDetails" class="q-pa-md" style="max-width: 600px; margin: 0 auto">
-    <q-card-section class="q-gutter-md">
-      <h3 class="text-center">Сессия: {{ props.sessionName }}</h3>
+    <q-card v-if="sessionDetails" class="q-pa-md q-mx-auto">
+      <q-card-section>
+        <h4 class="text-center">Сессия: {{ props.sessionName }}</h4>
+        <div class="row q-gutter-sm justify-center q-mt-sm">
+          <p>Status: </p>
+          <q-chip
+            dense
+            :color="sessionDetails.is_broken ? 'red' : 'green'"
+            text-color="white"
+          >
+            {{ sessionDetails.is_broken ? 'Broken' : 'Not broken' }}
+          </q-chip>
+          <q-chip
+            dense
+            :color="sessionDetails.is_authenticated ? 'positive' : 'negative'"
+            text-color="white"
+          >
+            {{ sessionDetails.is_authenticated ? 'Authenticated' : 'Not authenticated' }}
+          </q-chip>
+        </div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section class="q-gutter-md">
         <q-select
           v-model="isActiveSelected"
           :options="isActiveOptions"
-          label="Статус активности"
+          label="Activity status"
           dense
-        />
-      <q-select
-        v-model="sessionDetails.is_authenticated"
-        label="is authenticated"
-        dense
-        disable
-      />
-      <q-select
-        v-model="sessionDetails.is_broken"
-        label="is broken"
-        dense
-        disable
-      />
-        <q-input
-          v-model="sessionDetails.session_parameters.app_version"
-          label="Версия приложения"
-          dense
-          disable
-        />
-        <q-input v-model="sessionDetails.session_parameters.lang_code" label="Язык" dense disable />
-        <q-input
-          v-model="sessionDetails.session_parameters.device_model"
-          label="Модель устройства"
-          dense
-          disable
-        />
-        <q-input
-          v-model="sessionDetails.session_parameters.system_version"
-          label="Система"
-          dense
-          disable
-        />
-        <q-input
-          v-model="sessionDetails.session_parameters.system_lang_code"
-          label="Язык системы"
-          dense
-          disable
-        />
+          emit-value
+          map-options
+          behavior="menu"
 
-        <q-input v-model="sessionDetails.session_parameters.api_id" label="API ID" dense disable />
-        <q-input
-          v-model="sessionDetails.session_parameters.api_hash"
-          label="API Hash"
-          dense
-          disable
         />
+        <div class="row q-gutter-md">
+          <q-input
+            v-model="sessionDetails.session_parameters.app_version"
+            label="Версия приложения"
+            dense
+            disable
+            class="col-6 full-width"
+
+          />
+          <q-input
+            v-model="sessionDetails.session_parameters.lang_code"
+            label="Язык"
+            dense
+            disable
+            class="col-6 full-width"
+          />
+          <q-input
+            v-model="sessionDetails.session_parameters.device_model"
+            label="Модель устройства"
+            dense
+            disable
+            class="col-12 full-width"
+          />
+          <q-input
+            v-model="sessionDetails.session_parameters.system_version"
+            label="Система"
+            dense
+            disable
+            class="col-6 full-width"
+          />
+          <q-input
+            v-model="sessionDetails.session_parameters.system_lang_code"
+            label="Язык системы"
+            dense
+            disable
+            class="col-6 full-width"
+          />
+        </div>
+        <q-input v-model="sessionDetails.session_parameters.api_id" label="API ID" dense disable class="col-6" />
+        <q-input v-model="sessionDetails.session_parameters.api_hash" label="API Hash" dense disable class="col-6" />
         <q-input
           v-model="sessionDetails.proxy"
-          label="Proxy" dense
+          label="Proxy"
+          dense
           :error="!!errorMessage"
           :error-message="errorMessage"
         />
-<!--        <q-btn-->
-<!--          @click="checkProxy(sessionDetails.proxy)"-->
-<!--          label="Check"-->
-<!--          :disable="!sessionDetails.proxy"-->
-<!--        />-->
-
-      <div class="q-mt-md q-gutter-sm flex fa-shuttle-space" style=" justify-content: space-between">
-        <q-btn :label="'Сохранить'" color="positive" @click="updateSessionHandler" />
-        <q-btn label="Удалить" color="negative" @click="deleteSessionHandler" />
-      </div>
-
-      <q-btn label="Закрыть" color="primary" @click="emit('close')" class="q-mt-md" />
-    </q-card-section>
-  </q-card>
+        <!--        <q-btn-->
+        <!--          @click="checkProxy(sessionDetails.proxy)"-->
+        <!--          label="Check"-->
+        <!--          :disable="!sessionDetails.proxy"-->
+        <!--        />-->
+        <q-separator />
+        <div class="row q-mt-md q-gutter-sm justify-between">
+          <q-btn label="Save" color="positive" @click="updateSessionHandler" />
+          <q-btn label="Удалить" color="negative" @click="deleteSessionHandler" />
+        </div>
+        <q-btn label="Закрыть" color="primary" @click="emit('close')" class="q-mt-md full-width" />
+      </q-card-section>
+    </q-card>
 
   <div v-else>
     <p>Загрузка данных о сессии...</p>
   </div>
+
 </template>
