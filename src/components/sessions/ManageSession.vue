@@ -53,70 +53,45 @@ onMounted(fetchSessionDetails)
   <q-card v-if="sessionDetails" class="q-pa-md" style="max-width: 600px; margin: 0 auto">
     <q-card-section class="q-gutter-md">
       <h3 class="text-center">Сессия: {{ props.sessionName }}</h3>
-
-      <div>
         <q-select
           v-model="isActiveSelected"
           :options="isActiveOptions"
           label="Статус активности"
           dense
         />
-      </div>
-
-      <div>
         <q-input
           v-model="sessionDetails.session_parameters.app_version"
           label="Версия приложения"
           dense
           disable
         />
-      </div>
-
-      <div>
         <q-input v-model="sessionDetails.session_parameters.lang_code" label="Язык" dense disable />
-      </div>
-
-      <div>
         <q-input
           v-model="sessionDetails.session_parameters.device_model"
           label="Модель устройства"
           dense
           disable
         />
-      </div>
-
-      <div>
         <q-input
           v-model="sessionDetails.session_parameters.system_version"
           label="Система"
           dense
           disable
         />
-      </div>
-
-      <div>
         <q-input
           v-model="sessionDetails.session_parameters.system_lang_code"
           label="Язык системы"
           dense
           disable
         />
-      </div>
 
-      <div>
         <q-input v-model="sessionDetails.session_parameters.api_id" label="API ID" dense disable />
-      </div>
-
-      <div>
         <q-input
           v-model="sessionDetails.session_parameters.api_hash"
           label="API Hash"
           dense
           disable
         />
-      </div>
-
-      <div>
         <q-input
           v-model="sessionDetails.proxy"
           label="Proxy" dense
@@ -125,7 +100,7 @@ onMounted(fetchSessionDetails)
         />
       </div>
 
-      <div class="q-mt-md q-gutter-sm" style="display: flex; justify-content: space-between">
+      <div class="q-mt-md q-gutter-sm flex fa-shuttle-space" style=" justify-content: space-between">
         <q-btn :label="'Сохранить'" color="positive" @click="updateSessionHandler" />
         <q-btn label="Удалить" color="negative" @click="deleteSessionHandler" />
       </div>
