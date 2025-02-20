@@ -85,7 +85,7 @@ onMounted(() => {
   </div>
 
 
-  <q-dialog v-model="showErrorModal">
+  <q-dialog v-model="showErrorModal" persistent>
     <q-card>
       <q-card-section>
         <div class="text-h6">Сервер перестал отвечать на запросы. Проверьте сервер.</div>
