@@ -28,7 +28,7 @@ const defaultSessionData = {
 const sessionData = ref<SessionData>(structuredClone(defaultSessionData))
 
 const deviceNameModalOpen = ref(false)
-const deviceNameInput = ref('')
+const deviceNameInput = ref<string>('')
 
 const currentPage = ref(1)
 const rowsPerPage = ref(5)
@@ -92,16 +92,17 @@ const saveDeviceData = () => {
   const { ...deviceData } = sessionData.value
 
   if (isEditingDevice.value && originalDeviceName.value !== null) {
-    const index = devices.value.findIndex(d => d.deviceName === originalDeviceName.value)
+    const index = devices.value.findIndex(device => device.deviceName === originalDeviceName.value)
     if (index !== -1) {
       devices.value[index] = {
-        deviceName: deviceNameInput.value,
+        deviceName: deviceData.name,
         data: deviceData
       }
     }
+    originalDeviceName.value = null;
   } else {
     devices.value.push({
-      deviceName: deviceNameInput.value,
+      deviceName: deviceData.name,
       data: deviceData
     })
   }
@@ -131,7 +132,6 @@ const cancelOverwrite = () => {
 
 const loadDevice = (device: Device) => {
   sessionData.value = {
-    ...sessionData.value,
     name: '',
     appVersion: device.data.appVersion,
     langCode: device.data.langCode,
@@ -142,7 +142,6 @@ const loadDevice = (device: Device) => {
     apiHash: device.data.apiHash,
     sessionName: ''
   }
-  console.log(device.data.appVersion)
   createSessionError.value = `Используется устройство: ${device.deviceName}`
 }
 
@@ -152,8 +151,7 @@ const editDevice = (index: number) => {
   originalDeviceName.value = device.deviceName
   deviceNameInput.value = device.deviceName
   sessionData.value = {
-    ...sessionData.value,
-    name: '',
+    name: device.deviceName,
     appVersion: device.data.appVersion,
     langCode: device.data.langCode,
     deviceModel: device.data.deviceModel,
