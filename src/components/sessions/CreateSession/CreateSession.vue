@@ -279,7 +279,6 @@ const sessionNameLabel = computed(() =>
               <p class="text-caption"> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
             </q-card-section>
             <q-card-actions align="right">
-              <q-toggle v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
               <q-btn-group flat unelevated>
                 <q-btn label="Exit" color="negative" @click="cancelAction" />
                 <q-btn
@@ -290,6 +289,11 @@ const sessionNameLabel = computed(() =>
                   :disable="!sessionData.name"
                 />
                 <q-btn label="Save device" color="secondary" @click="saveDevice" />
+              </q-btn-group>
+            </q-card-actions>
+            <q-card-actions align="center">
+              <q-btn-group flat unelevated>
+                <q-toggle v-model="viewDevices" label="Devices" class="q-mt-sm" />
               </q-btn-group>
             </q-card-actions>
             <div v-if="createSessionError" class="text-red flex justify-center items-center text-center">
@@ -344,7 +348,7 @@ const sessionNameLabel = computed(() =>
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="deviceNameModalOpen" persistent>
+    <q-dialog v-model="deviceNameModalOpen" >
       <q-card style="min-width: 300px">
         <q-card-section>
           <div class="text-h6">Enter the name of the device</div>
