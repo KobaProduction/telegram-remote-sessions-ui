@@ -60,9 +60,13 @@ const cancelAction = () => {
   if (isEditingDevice.value) {
     isEditingDevice.value = false
     originalDeviceName.value = null
+    sessionData.value = structuredClone(defaultSessionData)
+    createSessionError.value = ''
+    deviceNameModalOpen.value = false
+    isDialogOpen.value = true
+  } else {
+    isDialogOpen.value = false
   }
-  createSessionError.value = ''
-  closeDialog()
 }
 
 const saveDevice = () => {
@@ -142,7 +146,7 @@ const loadDevice = (device: Device) => {
     apiHash: device.data.apiHash,
     sessionName: ''
   }
-  createSessionError.value = `Используется устройство: ${device.deviceName}`
+  createSessionError.value = `The device is used: ${device.deviceName}`
 }
 
 const editDevice = (index: number) => {
@@ -212,7 +216,7 @@ const createNewSession = async () => {
   }
 }
 
-const headerText = computed(() => isEditingDevice.value ? 'Редактирование устройства' : 'Создать новую сессию')
+const headerText = computed(() => isEditingDevice.value ? 'Edit device' : 'Create new session')
 
 const sessionNameLabel = computed(() =>
   isEditingDevice.value ? `Device name (${sessionData.value.name})` : 'Session name'
@@ -221,7 +225,7 @@ const sessionNameLabel = computed(() =>
 
 <template>
   <div class="col self-center q-pa-md">
-    <q-btn @click="openDialog" color="primary" label="Создать сессию" class="q-mt-md" />
+    <q-btn @click="openDialog" color="primary" label="Create session" class="q-mt-md" />
 
     <q-dialog v-model="isDialogOpen">
       <q-card class="modal-card">
@@ -277,15 +281,15 @@ const sessionNameLabel = computed(() =>
             <q-card-actions align="right">
               <q-toggle v-model="viewDevices" label="Девайсы" class="q-mt-sm" />
               <q-btn-group flat unelevated>
-                <q-btn label="Выйти" color="negative" @click="cancelAction" />
+                <q-btn label="Exit" color="negative" @click="cancelAction" />
                 <q-btn
                   v-if="!isEditingDevice"
-                  label="Создать"
+                  label="Create"
                   color="primary"
                   @click="createNewSession"
                   :disable="!sessionData.name"
                 />
-                <q-btn label="Сохранить устройство" color="secondary" @click="saveDevice" />
+                <q-btn label="Save device" color="secondary" @click="saveDevice" />
               </q-btn-group>
             </q-card-actions>
             <div v-if="createSessionError" class="text-red flex justify-center items-center text-center">
@@ -296,14 +300,14 @@ const sessionNameLabel = computed(() =>
           <div v-if="viewDevices" class="col-12">
             <q-card-section>
               <div class="row items-center justify-between q-mb-sm">
-                <h6 class="q-ma-none">Девайсы</h6>
+                <h6 class="q-ma-none">Devices</h6>
                 <q-select
                   v-model="rowsPerPage"
                   :options="rowsPerPageOptions"
                   dense
                   outlined
                   style="max-width: 100px;"
-                  label="На странице"
+                  label="per page"
                 />
               </div>
               <q-list v-if="devices.length">
@@ -325,7 +329,7 @@ const sessionNameLabel = computed(() =>
                   </q-item-section>
                 </q-item>
               </q-list>
-              <div v-else class="text-center">Нет сохраненных устройств</div>
+              <div v-else class="text-center">There are no saved devices</div>
               <div class="row items-center justify-center q-mt-sm">
                 <q-pagination
                   v-model="currentPage"
@@ -343,21 +347,21 @@ const sessionNameLabel = computed(() =>
     <q-dialog v-model="deviceNameModalOpen" persistent>
       <q-card style="min-width: 300px">
         <q-card-section>
-          <div class="text-h6">Введите название устройства</div>
+          <div class="text-h6">Enter the name of the device</div>
         </q-card-section>
 
         <q-card-section>
           <q-input
             v-model="deviceNameInput"
-            label="Название устройства"
+            label="Device name"
             autofocus
             @keyup.enter="confirmDeviceName"
           />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Отмена" color="negative" @click="deviceNameModalOpen = false" />
-          <q-btn flat label="Сохранить" color="primary" @click="confirmDeviceName" />
+          <q-btn flat label="Cancel" color="negative" @click="deviceNameModalOpen = false" />
+          <q-btn flat label="Save" color="primary" @click="confirmDeviceName" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -366,12 +370,12 @@ const sessionNameLabel = computed(() =>
       <q-card class="q-pa-md">
         <q-card-section>
           <div class="text-h6">
-            Устройство с таким названием уже существует. Вы не изменили имя устройства и оно будет перезаписано.
+            A device with this name already exists. You have not changed the name of the device and it will be overwritten.
           </div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn label="Нет" color="negative" flat @click="cancelOverwrite" />
-          <q-btn label="Да" color="primary" flat @click="confirmOverwrite" />
+          <q-btn label="Yes" color="negative" flat @click="cancelOverwrite" />
+          <q-btn label="No" color="primary" flat @click="confirmOverwrite" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -380,12 +384,12 @@ const sessionNameLabel = computed(() =>
       <q-card class="q-pa-md">
         <q-card-section>
           <div class="text-h6">
-            Вы действительно хотите удалить устройство?
+            Do you really want to remove the device?
           </div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn label="Нет" color="negative" flat @click="cancelDeleteDevice" />
-          <q-btn label="Да" color="primary" flat @click="confirmDeleteDevice" />
+          <q-btn label="No" color="negative" flat @click="cancelDeleteDevice" />
+          <q-btn label="Yes" color="primary" flat @click="confirmDeleteDevice" />
         </q-card-actions>
       </q-card>
     </q-dialog>
