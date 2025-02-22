@@ -79,7 +79,7 @@ const closeSession = () => {
     />
     <div v-if="filteredSessions.length === 0">
       <q-banner class="bg-warning text-black">
-        No session with this name was found
+        Sessions not found
       </q-banner>
     </div>
     <div v-else>
@@ -106,7 +106,6 @@ const closeSession = () => {
         boundary-links
         :max="totalPages"
         class="q-pa-xs q-mt-md"
-
       />
     </div>
     <q-dialog v-model="isDialogOpen">
