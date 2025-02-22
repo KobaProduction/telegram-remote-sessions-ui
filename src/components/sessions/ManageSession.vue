@@ -50,7 +50,13 @@ const updateSessionHandler = async () => {
 const deleteSessionHandler = async () => {
   try {
     await props.api.deleteSession(props.sessionName)
-    console.log('Сессия удалена')
+    Notify.create({
+      message: `Session ${props.sessionName} deleted`,
+      position: 'bottom',
+      color:'red',
+      timeout: 1000,
+      progress: true,
+    })
     emit('close')
   } catch (error) {
     console.error('Ошибка при удалении сессии:', error)
@@ -154,7 +160,6 @@ onMounted(fetchSessionDetails)
           emit-value
           map-options
           behavior="menu"
-
         />
         <div class="row q-gutter-md">
           <q-input
