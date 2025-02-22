@@ -10,9 +10,20 @@ const sessions = ref<string[] | null>(null)
 const error = ref<string>('')
 const showErrorModal = ref(false)
 const isConnected = ref(true)
-
+const selectedState = ref<number | null>(null)
+const selectedActive = ref<boolean | null>(null)
 const serverStore = useServerStore()
-
+const sessionStatesSelector = [
+  { label: 'All states', value: null },
+  { label: "Not authenticated", value: 0 },
+  { label: "Authenticated", value: 1 },
+  { label: "Broken", value: 2 }
+];
+const sessionIsActiveSelector = [
+  { label: 'All active status', value: null },
+  { label: "Active", value: true},
+  { label: "Inactive", value: false },
+];
 const props = defineProps<{
   api: TelegramRemoteSessionApi;
 }>()
@@ -21,7 +32,7 @@ let intervalId: ReturnType<typeof setInterval>
 
 async function fetchSessions() {
   try {
-    const data: SessionListResponse = await props.api.getSessions()
+    const data: SessionListResponse = await props.api.getSessions(selectedState.value, selectedActive.value)
     sessions.value = data.sessions
     isConnected.value = true
     showErrorModal.value = false
@@ -38,7 +49,7 @@ async function checkConnection() {
     if ((await props.api.getStatus()).status) {
       isConnected.value = true
       showErrorModal.value = false
-      fetchSessions()
+      await fetchSessions()
     } else {
       new Error('Server not responding properly')
     }
@@ -76,6 +87,25 @@ onMounted(() => {
 <template>
   <div class="column">
     <CreateSessionButton @sessionCreated="fetchSessions" :api="props.api"></CreateSessionButton>
+    <q-select
+      v-model="selectedActive"
+      :options="sessionIsActiveSelector"
+      label="Session activity filter"
+      outlined
+      emit-value
+      map-options
+      class="q-mb-sm"
+      @update:model-value="fetchSessions"
+    />
+    <q-select
+      v-model="selectedState"
+      :options="sessionStatesSelector"
+      label="Session state filter"
+      outlined
+      emit-value
+      map-options
+      @update:model-value="fetchSessions"
+    />
     <div v-if="sessions" class="col self-center">
       <SessionList :sessions="sessions" :api="props.api" />
     </div>

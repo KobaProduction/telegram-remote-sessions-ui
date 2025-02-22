@@ -53,7 +53,18 @@ export class TelegramRemoteSessionApi {
     return (await this.put<Session>(url)).data as Session
   }
 
-  async getSessions(): Promise<SessionListResponse> {
-    return (await this.get(`/v1/sessions/read`)).data as SessionListResponse
+  async getSessions(state?: number | null, active?: boolean | null): Promise<SessionListResponse> {
+    const params = new URLSearchParams();
+    if (state != null) {
+      params.append("state", String(state));
+    }
+    if (active != null) {
+      params.append("active", String(active));
+    }
+    const queryString = params.toString();
+    const url = `/v1/sessions/read${queryString ? `?${queryString}` : ""}`;
+    return (await this.get(url)).data as SessionListResponse;
   }
+
+
 }
