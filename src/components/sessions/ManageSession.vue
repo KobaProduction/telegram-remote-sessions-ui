@@ -3,9 +3,16 @@ import { ref, onMounted } from 'vue'
 import type { ApiResponse, Session } from 'src/shared/api/trs/model'
 import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
 import { AxiosError } from 'axios'
+import type { Device } from 'components/sessions/CreateSession/model'
+import { Notify } from 'quasar'
 
 const props = defineProps<{ sessionName: string; api: TelegramRemoteSessionApi }>()
 const emit = defineEmits(['close'])
+
+const devices = ref<Device[]>(JSON.parse(localStorage.getItem('devices') || '[]') as Device[])
+const deviceNameModalOpen = ref(false)
+const deviceNameInput = ref<string>('')
+const deviceNameError = ref<string>('')
 
 const sessionDetails = ref<Session | null>(null)
 const isActiveSelected = ref<boolean>(true)
@@ -20,7 +27,7 @@ async function fetchSessionDetails() {
     sessionDetails.value = await props.api.getSessionDetails(props.sessionName)
     isActiveSelected.value = sessionDetails.value.is_active
   } catch (error) {
-    console.error('Ошибка при загрузке данных сессии:', error)
+    console.error('Error when downloading these session:', error)
   }
 }
 
@@ -47,6 +54,49 @@ const deleteSessionHandler = async () => {
     console.error('Ошибка при удалении сессии:', error)
   }
 }
+
+function showSaveAsDevice(){
+  console.log(sessionDetails.value?.session_parameters)
+  deviceNameModalOpen.value = true
+}
+
+function saveDevice() {
+  const newDeviceName = deviceNameInput.value.trim()
+  if (!newDeviceName) {
+    deviceNameError.value = 'The name of the device cannot be empty'
+    return
+  }
+  if (devices.value.some(device => device.deviceName === newDeviceName)) {
+    deviceNameError.value = 'A device with this name already exists!'
+    return
+  }
+  const newDevice: Device = {
+    deviceName: newDeviceName,
+    data:{
+      sessionName: props.sessionName,
+      appVersion: sessionDetails.value?.session_parameters.app_version || '',
+      langCode: sessionDetails.value?.session_parameters.lang_code || '',
+      deviceModel: sessionDetails.value?.session_parameters.device_model || '',
+      systemVersion: sessionDetails.value?.session_parameters.system_version || '',
+      systemLangCode: sessionDetails.value?.session_parameters.system_lang_code || '',
+      apiId: sessionDetails.value?.session_parameters.api_id || 1,
+      apiHash: sessionDetails.value?.session_parameters.api_hash || '',
+    }
+  }
+
+  devices.value.push(newDevice)
+  localStorage.setItem('devices', JSON.stringify(devices.value))
+
+  Notify.create({
+    message: 'The device is successfully saved',
+    position: 'bottom',
+    color:'green',
+    timeout: 1000,
+    progress: true,
+  })
+  deviceNameModalOpen.value = false
+}
+
 
 // async function checkProxy(proxy: string | null) {
 //   if (!proxy) return;
@@ -161,14 +211,38 @@ onMounted(fetchSessionDetails)
         <q-separator />
         <div class="row q-mt-md q-gutter-sm justify-between">
           <q-btn label="Save" color="positive" @click="updateSessionHandler" />
-          <q-btn label="Удалить" color="negative" @click="deleteSessionHandler" />
+          <q-btn label="Save as Device" color="secondary" @click="showSaveAsDevice"></q-btn>
+          <q-btn label="Delete" color="negative" @click="deleteSessionHandler" />
         </div>
-        <q-btn label="Закрыть" color="primary" @click="emit('close')" class="q-mt-md full-width" />
+        <q-btn label="Close" color="primary" @click="emit('close')" class="q-mt-md full-width" />
       </q-card-section>
     </q-card>
 
   <div v-else>
-    <p>Загрузка данных о сессии...</p>
+    <p>Loading data about the session...</p>
   </div>
+
+  <q-dialog v-model="deviceNameModalOpen">
+    <q-card style="min-width: 300px">
+      <q-card-section>
+        <div class="text-h6">Enter the name of the device</div>
+      </q-card-section>
+
+      <q-card-section>
+        <q-input
+          v-model="deviceNameInput"
+          label="Device name"
+          autofocus
+          :error="!!deviceNameError"
+          :error-message="deviceNameError"
+        />
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Cancel" color="negative" @click="deviceNameModalOpen = false" />
+        <q-btn flat label="Save" color="primary" @click="saveDevice" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
 </template>
