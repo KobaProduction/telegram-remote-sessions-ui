@@ -4,11 +4,13 @@ import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemote
 import HintedInput from 'src/shared/ui/input/HintedInput.vue'
 import { AxiosError } from 'axios'
 import type { Device, SessionData } from './model'
+import { useDeviceStore } from 'src/shared/api/devices/deviceStore'
 
 const props = defineProps<{ api: TelegramRemoteSessionApi }>()
 
 const isDialogOpen = ref(false)
-const devices = ref<Device[]>(JSON.parse(localStorage.getItem('devices') || '[]') as Device[])
+const deviceStore = useDeviceStore()
+const devices = deviceStore.devices
 const isEditingDevice = ref(false)
 const originalDeviceName = ref<string | null>(null)
 const viewDevices = ref<boolean>(false)
@@ -36,7 +38,7 @@ const rowsPerPageOptions = [5, 10, 20] as const
 
 const paginatedDevices = computed(() => {
   const start = (currentPage.value - 1) * rowsPerPage.value
-  return devices.value.slice(start, start + rowsPerPage.value)
+  return devices.slice(start, start + rowsPerPage.value)
 })
 
 const overwriteDialogOpen = ref(false)
@@ -83,7 +85,7 @@ const confirmDeviceName = () => {
     return
   }
 
-  const existingIndex = devices.value.findIndex(d => d.deviceName === deviceNameInput.value)
+  const existingIndex = devices.findIndex(d => d.deviceName === deviceNameInput.value)
   if (existingIndex !== -1 && !isEditingDevice.value) {
     pendingOverwriteIndex.value = existingIndex
     overwriteDialogOpen.value = true
@@ -96,22 +98,21 @@ const saveDeviceData = () => {
   const { ...deviceData } = sessionData.value
 
   if (isEditingDevice.value && originalDeviceName.value !== null) {
-    const index = devices.value.findIndex(device => device.deviceName === originalDeviceName.value)
+    const index = devices.findIndex(device => device.deviceName === originalDeviceName.value)
     if (index !== -1) {
-      devices.value[index] = {
+      devices[index] = {
         deviceName: deviceData.name,
         data: deviceData
       }
     }
     originalDeviceName.value = null;
   } else {
-    devices.value.push({
-      deviceName: deviceData.name,
+    devices.push({
+      deviceName: deviceNameInput.value,
       data: deviceData
     })
   }
-
-  localStorage.setItem('devices', JSON.stringify(devices.value))
+  localStorage.setItem('devices', JSON.stringify(devices))
   deviceNameModalOpen.value = false
   deviceNameInput.value = ''
 }
@@ -119,11 +120,11 @@ const saveDeviceData = () => {
 const confirmOverwrite = () => {
   if (pendingOverwriteIndex.value !== null) {
     const { ...deviceData } = sessionData.value
-    devices.value[pendingOverwriteIndex.value] = {
+    devices[pendingOverwriteIndex.value] = {
       deviceName: deviceNameInput.value,
       data: deviceData
     }
-    localStorage.setItem('devices', JSON.stringify(devices.value))
+    localStorage.setItem('devices', JSON.stringify(devices))
     pendingOverwriteIndex.value = null
     overwriteDialogOpen.value = false
   }
@@ -150,7 +151,7 @@ const loadDevice = (device: Device) => {
 }
 
 const editDevice = (index: number) => {
-  const device = devices.value[index]
+  const device = devices[index]
   if (!device) return
   originalDeviceName.value = device.deviceName
   deviceNameInput.value = device.deviceName
@@ -175,8 +176,7 @@ const requestDeleteDevice = (index: number) => {
 
 const confirmDeleteDevice = () => {
   if (pendingDeleteIndex.value !== null) {
-    devices.value.splice(pendingDeleteIndex.value, 1)
-    localStorage.setItem('devices', JSON.stringify(devices.value))
+    deviceStore.deleteDevice(pendingDeleteIndex.value)
     pendingDeleteIndex.value = null
     deleteConfirmDialogOpen.value = false
     currentPage.value = 1

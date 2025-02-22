@@ -5,11 +5,13 @@ import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemote
 import { AxiosError } from 'axios'
 import type { Device } from 'components/sessions/CreateSession/model'
 import { Notify } from 'quasar'
+import { useDeviceStore } from 'src/shared/api/devices/deviceStore'
 
 const props = defineProps<{ sessionName: string; api: TelegramRemoteSessionApi }>()
 const emit = defineEmits(['close'])
 
-const devices = ref<Device[]>(JSON.parse(localStorage.getItem('devices') || '[]') as Device[])
+const deviceStore = useDeviceStore()
+const devices = deviceStore.devices
 const deviceNameModalOpen = ref(false)
 const deviceNameInput = ref<string>('')
 const deviceNameError = ref<string>('')
@@ -56,7 +58,6 @@ const deleteSessionHandler = async () => {
 }
 
 function showSaveAsDevice(){
-  console.log(sessionDetails.value?.session_parameters)
   deviceNameModalOpen.value = true
 }
 
@@ -66,7 +67,7 @@ function saveDevice() {
     deviceNameError.value = 'The name of the device cannot be empty'
     return
   }
-  if (devices.value.some(device => device.deviceName === newDeviceName)) {
+  if (devices.some(device => device.deviceName === newDeviceName)) {
     deviceNameError.value = 'A device with this name already exists!'
     return
   }
@@ -84,8 +85,7 @@ function saveDevice() {
     }
   }
 
-  devices.value.push(newDevice)
-  localStorage.setItem('devices', JSON.stringify(devices.value))
+  deviceStore.saveDevice(newDevice)
 
   Notify.create({
     message: 'The device is successfully saved',
