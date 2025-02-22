@@ -71,7 +71,7 @@ const closeSession = () => {
     <q-select
       v-model="sessionsPerPage"
       :options="sessionsPerPageOptions"
-      label="Sessions on the page"
+      label="Sessions per page"
       outlined
       dense
       class="q-mb-md"
