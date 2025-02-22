@@ -38,6 +38,7 @@ const updateSessionHandler = async () => {
   const proxy = sessionDetails.value.proxy === '' ? 'null' : sessionDetails.value.proxy
   try {
     await props.api.updateSession(props.sessionName, isActiveSelected.value, proxy)
+    emit('close')
     errorMessage.value = ''
   } catch (e) {
     if (e instanceof AxiosError && e?.response?.data) {
