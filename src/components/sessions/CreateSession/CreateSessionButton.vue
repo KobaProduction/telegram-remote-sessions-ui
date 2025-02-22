@@ -15,6 +15,7 @@ const isEditingDevice = ref(false)
 const originalDeviceName = ref<string | null>(null)
 const viewDevices = ref<boolean>(false)
 const createSessionError = ref<string>('')
+const usedDeviceName = ref<string>('')
 const defaultSessionData = {
   name: '',
   appVersion: '',
@@ -147,7 +148,7 @@ const loadDevice = (device: Device) => {
     apiHash: device.data.apiHash,
     sessionName: ''
   }
-  createSessionError.value = `The device is used: ${device.deviceName}`
+  usedDeviceName.value = `The device is used: ${device.deviceName}`
 }
 
 const editDevice = (index: number) => {
@@ -232,8 +233,9 @@ const sessionNameLabel = computed(() =>
         <div class="row">
           <div class="col-12">
             <q-card-section>
-              <div class="row items-center">
+              <div class="col items-center">
                 <h6 class="q-ma-none">{{ headerText }}</h6>
+                <h6 class="q-ma-none text-blue"> {{ usedDeviceName }}</h6>
               </div>
               <HintedInput
                 v-model="sessionData.name"
@@ -270,13 +272,13 @@ const sessionNameLabel = computed(() =>
                 label="API ID"
                 hint="Attention! Use correct API ID from https://my.telegram.org/apps."
               />
-              <p class="text-caption"> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
+              <p class="text-caption"> You can get it here <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
               <HintedInput
                 v-model="sessionData.apiHash"
                 label="API Hash"
                 hint="Attention! Use correct API Hash from https://my.telegram.org/apps."
               />
-              <p class="text-caption"> You can get it here  <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
+              <p class="text-caption"> You can get it here <a href="https://my.telegram.org/apps">my.telegram.org/apps</a></p>
             </q-card-section>
             <q-card-actions align="right">
               <q-btn-group flat unelevated>
