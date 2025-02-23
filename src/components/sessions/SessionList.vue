@@ -77,6 +77,13 @@ const closeSession = () => {
       class="q-mb-md"
       @update:model-value="updateSessionsPerPage"
     />
+    <q-input
+      v-model="searchQuery"
+      label="Session name"
+      outlined
+      dense
+      class="q-mb-md"
+    />
     <div v-if="filteredSessions.length === 0">
       <q-banner class="bg-warning text-black">
         Sessions not found
