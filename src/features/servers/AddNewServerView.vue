@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useMemoryServersStore } from '@/entities/servers'
+import type { NewServerData } from '@/entities/servers/types'
 
-interface NewServerData {
-  name: string,
-  url: string,
-}
 
 const newServer = ref<NewServerData>({
-  name: '',
-  url: '',
+  name: '12313123',
+  url: 'http://localhost:3000/',
 })
 
 
@@ -16,9 +14,11 @@ const addServerErrorMessage = ref<string>('')
 const addServerUrlErrorMessage = ref<string>('')
 
 
+const memoryStore = useMemoryServersStore()
+
 
 const addServer = () => {
-  // serversStorageApi.addServer(newServer)
+  memoryStore.addNewServer(newServer.value)
 }
 </script>
 

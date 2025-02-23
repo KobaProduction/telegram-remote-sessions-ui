@@ -9,9 +9,32 @@ import type {
 
 export class TelegramRemoteSessionApi {
   private axios: AxiosInstance
+  private webSocket?: WebSocket
+  private urlObj: URL
 
   constructor(url: string = 'http://localhost') {
-    this.axios = axios.create({ baseURL: url })
+    this.urlObj = new URL(url)
+    this.axios = axios.create({ baseURL: this.urlObj.href })
+  }
+
+  close() {
+    if (this.webSocket) {
+      this.webSocket.close()
+    }
+  }
+
+  openWebsocket(onConnect: () => void, onDisconnect: () => void) {
+    if (this.webSocket) return
+    this.webSocket = new WebSocket(this.urlObj.href + "v1/ws")
+    this.webSocket.onopen = () => (onConnect())
+    this.webSocket.onclose = () => {
+      onDisconnect()
+      this.openWebsocket(onConnect, onDisconnect)
+    }
+  }
+
+  isConnected(): boolean {
+    return this?.webSocket?.readyState === WebSocket.OPEN
   }
 
   getUrl(): string {

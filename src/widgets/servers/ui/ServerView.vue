@@ -81,7 +81,7 @@ const memoryStore = useMemoryServersStore()
 const staticStore = useStaticServersStore()
 
 async function loadServer() {
-  if (!memoryStore.connectedServerApi && staticStore.lastConnectedServerUrl) {
+  if (!memoryStore.connectedServer && staticStore.lastConnectedServerUrl) {
     await memoryStore.connect(staticStore.lastConnectedServerUrl)
   }
 }
@@ -92,7 +92,7 @@ onMounted(loadServer)
 
 <template>
   <div class="text-h6">Connected to server: {{ staticStore.lastConnectedServerUrl }}</div>
-  <p>{{ memoryStore.connectedServerVersion }}</p>
+<!--  <p>{{ memoryStore.connectedServerVersion }}</p>-->
 
 <!--      <div v-else class="full-width">-->
   <!--      <q-card-section>-->

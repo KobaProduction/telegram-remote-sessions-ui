@@ -3,13 +3,16 @@ import { defineStore } from 'pinia'
 // import { TelegramRemoteSessionApi } from '@/shared/api/trs/telegramRemoteSessionApi'
 // import { Notify } from 'quasar'
 import { TelegramRemoteSessionApi } from '@/shared/api/trs'
+import type {
+  NewServerData,
+  ServerHistoryItem,
+  ServerHistoryObject,
+  ServersHistoryObjects
+} from '@/entities/servers/types'
+import { uid } from 'quasar'
 //
 // const STORAGE_KEY = 'lastConnectedServerUrl'
 // const HISTORY_STORAGE_KEY = 'server_history'
-
-
-
-
 
 // const isConnected = ref(false)
 // const selectedServerApi = ref<TelegramRemoteSessionApi | null>(null)
@@ -80,30 +83,78 @@ import { TelegramRemoteSessionApi } from '@/shared/api/trs'
 // restoreConnection().then()
 // const api = computed(() => selectedServerApi.value instanceof TelegramRemoteSessionApi ? selectedServerApi.value : null)
 
+interface MemoryServersStorage {
+  connectedServer?: ServerHistoryObject
+  serversHistory: ServersHistoryObjects
+}
 
+export class ServerExistError extends Error {}
+export class ServerDisabledError extends Error {}
 
 export const useMemoryServersStore = defineStore('serversMemoryStore', {
-  state: () => ({
-    connectedServerApi: <TelegramRemoteSessionApi | undefined> undefined,
-    connectedServerVersion: <string | undefined> undefined,
-  }),
+  state: () =>
+    <MemoryServersStorage>{
+      serversHistory: {}
+    },
   actions: {
-
-    async connect(url: string) {
+    async connect(url: string): Promise<TelegramRemoteSessionApi | undefined> {
       const urlObj = new URL(url)
       const api = new TelegramRemoteSessionApi(urlObj.href)
       const res = await api.getStatus()
-      if (!res.status) return this.disconnect()
-      this.connectedServerVersion = res.version
-      this.connectedServerApi = api
+      if (!res.status) return api
+      // this.connectedServerVersion = res.version
+      // this.connectedServerApi = api
     },
 
     disconnect() {
-      this.connectedServerVersion = undefined
-      this.connectedServerApi = undefined
+      delete this.connectedServer
+    },
+
+    connectToServer(id: string) {
+      if (!this.serversHistory[id]) throw new ServerExistError(`Server does not exist`)
+      this.connectedServer = this.serversHistory[id]
+    },
+
+    changeOnline(id: string, state: boolean) {
+      if (this.serversHistory[id]) this.serversHistory[id].connected = state
+    },
+
+    async addNewServer(data: NewServerData) {
+      const included = Object.values(this.serversHistory).filter(
+        (serverHistoryObject) =>
+          serverHistoryObject.url === data.url || serverHistoryObject.name === data.name
+      )
+      if (included.length) throw new ServerExistError(`Server already exists`)
+      const urlObj = new URL(data.url)
+      const api = new TelegramRemoteSessionApi(urlObj.href)
+      const res = await api.getStatus()
+      if (!res.status) throw new ServerDisabledError(`Server disabled`)
+      // todo check version
+      let id = uid()
+      while (Object.keys(this.serversHistory).includes(id)) id = uid()
+      this.serversHistory[id] = {
+        url: data.url,
+        name: data.name,
+        api: api,
+        connected: false
+      }
+      api.openWebsocket(
+        () => this.changeOnline(id, true),
+        () => this.changeOnline(id, false)
+      )
+    },
+
+    deleteServer(id: string) {
+      if (!this.serversHistory[id]) throw new ServerExistError(`Server does not exist`)
+      this.serversHistory[id].api.close()
+      delete this.serversHistory[id]
+    },
+
+    editServer(id: string, data: ServerHistoryItem) {
+      if (!this.serversHistory[id]) throw new ServerExistError(`Server does not exist`)
+      this.serversHistory[id].url = data.url
+      this.serversHistory[id].name = data.name
     }
   },
-  persist: {
-    debug: true,
-  }
+  persist: false
 })

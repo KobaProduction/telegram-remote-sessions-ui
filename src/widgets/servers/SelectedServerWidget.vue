@@ -8,9 +8,9 @@ const serversMemoryStore = useMemoryServersStore()
 
 <template>
   <q-card class="q-pa-sm">
-    <ConnectForm v-if="!serversMemoryStore.connectedServerApi"/>
+    <ConnectForm v-if="!serversMemoryStore.connectedServer"/>
     <ServerView v-else />
-    <q-btn v-if="serversMemoryStore.connectedServerApi"
+    <q-btn v-if="serversMemoryStore.connectedServer"
       color="negative"
       label="Disconnect"
       @click="serversMemoryStore.disconnect"
