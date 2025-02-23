@@ -10,11 +10,12 @@ export const useServerStore = defineStore('server', () => {
   const isConnected = ref(false)
   const selectedServerApi = ref<TelegramRemoteSessionApi | null>(null)
   const lastConnectedServerUrl = ref(localStorage.getItem(STORAGE_KEY) || '')
-  const serverHistory = ref<string[]>(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]'))
+  const serverHistory = ref<Record<string, string>>(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '{}'))
 
   const saveServerHistory = () => {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(serverHistory.value))
   }
+
   async function connectToServer(serverUrl: string, rememberServer: boolean = false) {
     try {
       const api = createApiInstance(serverUrl)
@@ -26,10 +27,12 @@ export const useServerStore = defineStore('server', () => {
       Notify.create({
         message: `✅ Successful connection to the server!: ${serverUrl}`,
         timeout: 1000,
-        progress: true,
+        progress: true
       })
-      if (rememberServer && !serverHistory.value.includes(serverUrl)) {
-        serverHistory.value.push(serverUrl)
+      if (rememberServer && !Object.values(serverHistory.value).includes(serverUrl)) {
+        const serverName = Object.keys(serverHistory.value).find(
+          key => serverHistory.value[key] === serverUrl) || `Server ${Object.keys(serverHistory.value).length + 1}`
+        serverHistory.value[serverName] = serverUrl
         saveServerHistory()
       }
 
@@ -41,6 +44,7 @@ export const useServerStore = defineStore('server', () => {
       throw error instanceof Error ? error : new Error('Неизвестная ошибка')
     }
   }
+
   const createApiInstance = (serverUrl: string): TelegramRemoteSessionApi => {
     let url = serverUrl
     if (!/^https?:\/\//.test(url)) {
@@ -48,13 +52,14 @@ export const useServerStore = defineStore('server', () => {
     }
     return new TelegramRemoteSessionApi(url)
   }
+
   function disconnectFromServer() {
     Notify.create({
-      message: `Disconnected from the server!`,
+      message: 'Disconnected from the server!',
       color: 'red',
       position: 'bottom',
       timeout: 1000,
-      progress: true,
+      progress: true
     })
     localStorage.removeItem(STORAGE_KEY)
     selectedServerApi.value = null
@@ -80,5 +85,6 @@ export const useServerStore = defineStore('server', () => {
     api,
     createApiInstance,
     saveServerHistory,
-    serverHistory}
+    serverHistory
+  }
 })
