@@ -229,7 +229,7 @@ const sessionNameLabel = computed(() =>
     <q-btn @click="openDialog" color="primary" label="Create session" class="q-mt-md" />
 
     <q-dialog v-model="isDialogOpen">
-      <q-card class="modal-card">
+      <q-card class="modal-card" style="min-width: 300px; max-width: 800px; width: 30vw;">
         <div class="row">
           <div class="col-12">
             <q-card-section>
@@ -350,7 +350,7 @@ const sessionNameLabel = computed(() =>
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="deviceNameModalOpen" >
+    <q-dialog v-model="deviceNameModalOpen">
       <q-card style="min-width: 300px">
         <q-card-section>
           <div class="text-h6">Enter the name of the device</div>
