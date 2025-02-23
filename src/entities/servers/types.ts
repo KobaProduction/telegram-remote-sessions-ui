@@ -3,4 +3,9 @@ export interface NewServerData {
   url: string
 }
 
-export type ServerCrudApiErrorCallback = (error: Error) => void
+export interface ServerHistoryItem {
+  name: string
+  url: string
+  connected: boolean
+}
+

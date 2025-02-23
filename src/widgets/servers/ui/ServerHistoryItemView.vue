@@ -4,13 +4,7 @@ import { ref } from 'vue'
 // import { AxiosError } from 'axios'
 // import { useServerStore } from '@/entities/servers'
 import type { ServerStatuses } from '@/widgets/servers/types/props'
-
-interface ServerListProps {
-  serverName: string
-  serverUrl: string
-  serverStatus: boolean,
-  onConnectClick: () => void
-}
+import type { ServerHistoryItem } from '@/entities/servers'
 
 // const serverStore = useServerStore()
 
@@ -18,14 +12,12 @@ const serverStatuses = ref<ServerStatuses>(new Map())
 
 const updateServerErrorMessage = ref<string>('Server is not available')
 
-const props = defineProps<ServerListProps>()
+const props = defineProps<ServerHistoryItem>()
 
-const editingIndex = ref<string | null>(null)
-const editedServerName = ref<string>('')
-const editedServerURL = ref<string>('')
+const editedServerName = ref<string>(props.name || '')
+const editedServerURL = ref<string>(props.url || '')
 const editedServerNameError = ref<string>('')
 const editedServerUrlError = ref<string>('')
-
 
 // const saveEdit = async () => {
 //   if (!editedServerURL.value.trim() || !editedServerName.value.trim()) return
@@ -95,39 +87,41 @@ const editedServerUrlError = ref<string>('')
 //   })
 // }
 //
-//
-//
-//
-// const editServer = (serverName: string) => {
-//   const originalServerUrl = serverStore.serverHistory[serverName] || ''
-//   editingIndex.value = serverName
-//   editedServerName.value = serverName
-//   editedServerURL.value = originalServerUrl
-// }
-//
-// const getStatusIcon = (serverName: string) => {
-//   return serverStatuses.value.get(serverName) ? 'check_circle' : 'cancel'
-// }
-//
-// onMounted(() => {
-//   updateServerStatuses()
-//   setInterval(updateServerStatuses, 1000)
-// })
+const editing = ref<boolean>(false)
+
+
+const removeServer = () => {
+  // editingIndex.value = serverName
+  // editedServerName.value = serverName
+  // editedServerURL.value = originalServerUrl
+}
+
+const editServer = () => {
+  editing.value = true
+  // editingIndex.value = serverName
+  // editedServerName.value = serverName
+  // editedServerURL.value = originalServerUrl
+}
+
+const saveEdit = () => {
+  editing.value = false
+}
+
+const connect = () => {
+  // !serverStatuses.get(props.serverName)
+}
 </script>
 
 <template>
   <q-item-section class="col">
     <div class="row items-center">
       <q-icon
-        name="getStatusIcon(props.serverName)"
+        :name="props.connected ? 'check_circle' : 'cancel'"
         class="q-mr-sm"
         size="sm"
-        :color="serverStatuses.get(props.serverName) ? 'positive' : 'negative'"
+        :color="props.connected ? 'positive' : 'negative'"
       />
-      <div v-if="true" class="col q-gutter-y-sm">
-        sdfsfd
-      </div>
-      <div v-if="editingIndex === props.serverName" class="col q-gutter-y-sm">
+      <div v-if="editing" class="col q-gutter-y-sm">
         <q-input
           v-model="editedServerName"
           dense
@@ -148,16 +142,16 @@ const editedServerUrlError = ref<string>('')
       </div>
       <q-item-label v-else class="col">
         <div class="column">
-          <div class="text-bold text-body1">{{ props.serverName }}</div>
+          <div class="text-bold text-body1">{{ props.name }}</div>
           <a
-            :href="props.serverUrl"
+            :href="props.url"
             target="_blank"
             rel="noopener noreferrer"
             class="text-caption text-grey-7 text-underline"
           >
-            {{ props.serverUrl }}
+            {{ props.url }}
           </a>
-          <p v-if="!serverStatuses.get(props.serverName)" class="text-red text-caption q-mb-none">
+          <p v-if="!serverStatuses.get(props.name)" class="text-red text-caption q-mb-none">
             {{ updateServerErrorMessage }}
           </p>
         </div>
@@ -165,33 +159,20 @@ const editedServerUrlError = ref<string>('')
     </div>
 
     <q-item-section side class="q-gutter-xs">
-      <q-btn
-        color="secondary"
-        label="Connect"
-        @click="props.onConnectClick()"
-        size="sm"
-        :disable="!serverStatuses.get(props.serverName)"
-        class="full-width"
-      />
+      <q-btn color="secondary" label="Connect" size="sm" @click="connect" class="full-width" />
     </q-item-section>
 
     <q-item-section side class="q-gutter-xs">
+      <q-btn v-if="editing" color="positive" icon="check" @click="saveEdit" size="sm" />
       <q-btn
-        v-if="editingIndex === props.serverName"
-        color="positive"
-        icon="check"
-        click="saveEdit"
-        size="sm"
-      />
-      <q-btn
-        v-else
+        v-if="!editing"
         color="warning"
         icon="edit"
-        click="editServer(props.serverName)"
-        :disable="!serverStatuses.get(props.serverName)"
+        @click="editServer"
+        :disable="editing"
         size="sm"
       />
-      <q-btn color="negative" icon="delete" click="removeServer(props.serverName)" size="sm" />
+      <q-btn color="negative" icon="delete" @click="removeServer" size="sm" />
     </q-item-section>
   </q-item-section>
 </template>
