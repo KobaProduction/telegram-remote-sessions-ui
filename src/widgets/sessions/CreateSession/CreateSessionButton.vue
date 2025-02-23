@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
-import HintedInput from 'src/shared/ui/input/HintedInput.vue'
+import type { TelegramRemoteSessionApi } from '@/shared/api/trs/telegramRemoteSessionApi'
+import HintedInput from '@/shared/ui/input/HintedInput.vue'
 import { AxiosError } from 'axios'
 import type { Device, SessionData } from './model'
-import { useDeviceStore } from 'src/shared/api/devices/deviceStore'
+import { useDeviceStore } from '@/entities/devices'
 
 const props = defineProps<{ api: TelegramRemoteSessionApi }>()
 

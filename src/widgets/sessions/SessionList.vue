@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import ManageSession from 'components/sessions/ManageSession.vue'
-import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
+import ManageSession from '@/widgets/sessions/ManageSession.vue'
+import type { TelegramRemoteSessionApi } from '@/shared/api/trs/telegramRemoteSessionApi'
 
 const props = defineProps<{
   sessions: string[];

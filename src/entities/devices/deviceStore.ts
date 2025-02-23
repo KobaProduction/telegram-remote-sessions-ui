@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Device } from 'components/sessions/CreateSession/model'
+import type { Device } from '@/widgets/sessions/CreateSession/model'
 
 export const useDeviceStore = defineStore('device', () => {
   const devices = ref<Device[]>(JSON.parse(localStorage.getItem('devices') || '[]'))

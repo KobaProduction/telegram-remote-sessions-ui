@@ -6,13 +6,9 @@ function clearLocalStorage() {
 
 <template>
   <q-btn
-    @click="clearLocalStorage()"
+    @click="clearLocalStorage"
     label="Clear all saved data"
     color="secondary"
-    class="absolute-top"
-  ></q-btn>
+    class="full-width"
+  />
 </template>
-
-<style scoped>
-
-</style>

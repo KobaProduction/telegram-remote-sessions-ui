@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { ApiResponse, Session } from 'src/shared/api/trs/model'
-import type { TelegramRemoteSessionApi } from 'src/shared/api/trs/telegramRemoteSessionApi'
+import type { ApiResponse, Session } from '@/shared/api/trs/model'
+import type { TelegramRemoteSessionApi } from '@/shared/api/trs/telegramRemoteSessionApi'
 import { AxiosError } from 'axios'
-import type { Device } from 'components/sessions/CreateSession/model'
+import type { Device } from '@/widgets/sessions/CreateSession/model'
 import { Notify } from 'quasar'
-import { useDeviceStore } from 'src/shared/api/devices/deviceStore'
+import { useDeviceStore } from '@/entities/devices'
 
 const props = defineProps<{ sessionName: string; api: TelegramRemoteSessionApi }>()
 const emit = defineEmits(['close'])

@@ -14,6 +14,10 @@ export class TelegramRemoteSessionApi {
     this.axios = axios.create({ baseURL: url })
   }
 
+  getUrl(): string {
+    return this.axios.getUri()
+  }
+
   protected async get<T>(endpoint: string): Promise<AxiosResponse<T>> {
     return await this.axios.get(endpoint)
   }
@@ -31,7 +35,7 @@ export class TelegramRemoteSessionApi {
   }
 
   async getStatus(): Promise<ServerStatus> {
-    return (await this.get('status')).data as ServerStatus
+    return (await this.get('/v1/status')).data as ServerStatus
   }
 
   async getSessionDetails(sessionName: string): Promise<Session> {
