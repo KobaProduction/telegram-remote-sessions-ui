@@ -2,27 +2,19 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig((ctx) => {
   return {
-    // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
-    // preFetch: true,
-
-    // app boot file (/src/boot)
-    // --> boot files are part of "main.js"
-    // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
-      '~/src/shared/config/i18n',
-      '~/src/shared/api/axios/axios.ts',
+      '~/src/app/boot/i18n',
+      '~/src/app/boot/axios',
     ],
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: [
       '~/src/shared/ui/styles/app.scss'
     ],
 
-    // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
       // 'mdi-v7',
@@ -47,6 +39,10 @@ export default defineConfig((ctx) => {
         strict: true,
         vueShim: true
         // extendTsConfig (tsConfig) {}
+      },
+
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url))
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
@@ -80,7 +76,7 @@ export default defineConfig((ctx) => {
           ssr: ctx.modeName === 'ssr',
 
           // you need to set i18n resource including paths !
-          include: [ fileURLToPath(new URL('./src/i18n', import.meta.url)) ]
+          include: [ fileURLToPath(new URL('~/src/app/boot/i18n', import.meta.url)) ]
         }],
 
         ['vite-plugin-checker', {
@@ -136,53 +132,6 @@ export default defineConfig((ctx) => {
     //   bexManifestFile: 'src-bex/manifest.json
     },
 
-    // https://v2.quasar.dev/quasar-cli-vite/developing-ssr/configuring-ssr
-    ssr: {
-      prodPort: 3000, // The default port that the production server should use
-                      // (gets superseded if process.env.PORT is specified at runtime)
-
-      middlewares: [
-        'render' // keep this as last one
-      ],
-
-      // extendPackageJson (json) {},
-      // extendSSRWebserverConf (esbuildConf) {},
-
-      // manualStoreSerialization: true,
-      // manualStoreSsrContextInjection: true,
-      // manualStoreHydration: true,
-      // manualPostHydrationTrigger: true,
-
-      pwa: false
-      // pwaOfflineHtmlFilename: 'offline.html', // do NOT use index.html as name!
-
-      // pwaExtendGenerateSWOptions (cfg) {},
-      // pwaExtendInjectManifestOptions (cfg) {}
-    },
-
-    // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
-    pwa: {
-      workboxMode: 'GenerateSW' // 'GenerateSW' or 'InjectManifest'
-      // swFilename: 'sw.js',
-      // manifestFilename: 'manifest.json',
-      // extendManifestJson (json) {},
-      // useCredentialsForManifestTag: true,
-      // injectPwaMetaTags: false,
-      // extendPWACustomSWConf (esbuildConf) {},
-      // extendGenerateSWOptions (cfg) {},
-      // extendInjectManifestOptions (cfg) {}
-    },
-
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-cordova-apps/configuring-cordova
-    cordova: {
-      // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing
-    },
-
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
-    capacitor: {
-      hideSplashscreen: true
-    },
-
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
     electron: {
       // extendElectronMainConf (esbuildConf) {},
@@ -217,21 +166,5 @@ export default defineConfig((ctx) => {
         appId: 'telegram-remote-sessions-ui'
       }
     },
-
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
-    bex: {
-      // extendBexScriptsConf (esbuildConf) {},
-      // extendBexManifestJson (json) {},
-
-      /**
-       * The list of extra scripts (js/ts) not in your bex manifest that you want to
-       * compile and use in your browser extension. Maybe dynamic use them?
-       *
-       * Each entry in the list should be a relative filename to /src-bex/
-       *
-       * @example [ 'my-script.ts', 'sub-folder/my-other-script.js' ]
-       */
-      extraScripts: []
-    }
   }
 });

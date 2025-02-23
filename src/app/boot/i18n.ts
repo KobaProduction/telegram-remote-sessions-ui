@@ -1,10 +1,9 @@
 import { defineBoot } from '#q-app/wrappers';
 import { createI18n } from 'vue-i18n';
 
-import messages from './index';
+import messages from '@/shared/i18n';
 
 export type MessageLanguages = keyof typeof messages;
-// Type-define 'en-US' as the master schema for the resource
 export type MessageSchema = typeof messages['en-US'];
 
 // See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
@@ -22,9 +21,9 @@ declare module 'vue-i18n' {
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 
 export default defineBoot(({ app }) => {
-  const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
+  const i18n = createI18n({
     locale: 'en-US',
-    legacy: false,
+    legacy: false, // comment this out if not using Composition API
     messages,
   });
 

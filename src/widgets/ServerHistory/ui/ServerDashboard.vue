@@ -186,7 +186,7 @@ onMounted(() => {
         />
         <q-input
           v-model="newServerURL"
-          label="IP address"
+          :label="$t('serverIpAddress')"
           outlined
           dense
           :error="!!addServerUrlErrorMessage"
