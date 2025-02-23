@@ -225,7 +225,7 @@ const sessionNameLabel = computed(() =>
 </script>
 
 <template>
-  <div class="col self-center q-pa-md">
+  <div class="col self-center q-pa-md q-pt-xl">
     <q-btn @click="openDialog" color="primary" label="Create session" class="q-mt-md" />
 
     <q-dialog v-model="isDialogOpen">
