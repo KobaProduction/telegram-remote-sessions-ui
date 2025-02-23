@@ -9,7 +9,7 @@ const newServerName = ref<string>('')
 const newServerURL = ref<string>('')
 const editingIndex = ref<string | null>(null)
 const editedServerName = ref<string>('')
-const editedServerURL = ref<string >('')
+const editedServerURL = ref<string>('')
 const editedServerNameError = ref<string>('')
 const editedServerUrlError = ref<string>('')
 const updateServerErrorMessage = ref<string>('Server is not available')
@@ -49,11 +49,11 @@ const addServer = async () => {
   const serverName = newServerName.value.trim()
 
   if (Object.values(serverStore.serverHistory).includes(serverUrl)) {
-    addServerUrlErrorMessage.value = "Server with such URL already exists"
+    addServerUrlErrorMessage.value = 'Server with such URL already exists'
     return
   }
   if (serverStore.serverHistory[serverName]) {
-    addServerErrorMessage.value = "Server with such name already exists"
+    addServerErrorMessage.value = 'Server with such name already exists'
     return
   }
   const api = serverStore.createApiInstance(serverUrl)
@@ -61,7 +61,7 @@ const addServer = async () => {
   try {
     const status = await api.getStatus()
 
-    if (status.status === "ok") {
+    if (status.status === 'ok') {
       serverStore.serverHistory[serverName] = serverUrl
       serverStore.saveServerHistory()
       newServerURL.value = ''
@@ -72,7 +72,7 @@ const addServer = async () => {
         color: 'green',
         position: 'bottom',
         timeout: 1000,
-        progress: true,
+        progress: true
       })
     }
   } catch (e) {
@@ -94,7 +94,7 @@ const removeServer = (serverName: string) => {
     color: 'red',
     position: 'bottom',
     timeout: 1000,
-    progress: true,
+    progress: true
   })
 }
 
@@ -111,7 +111,7 @@ const saveEdit = async () => {
   const newServerUrl = editedServerURL.value.trim()
   const newServerName = editedServerName.value.trim()
   if (newServerName !== editingIndex.value && serverStore.serverHistory[newServerName]) {
-    editedServerNameError.value = "Server with this name already exists"
+    editedServerNameError.value = 'Server with this name already exists'
     return
   }
   try {
@@ -131,7 +131,7 @@ const saveEdit = async () => {
         color: 'green',
         position: 'bottom',
         timeout: 1000,
-        progress: true,
+        progress: true
       })
     }
   } catch (error) {
@@ -168,7 +168,7 @@ onMounted(() => {
     color="secondary"
     class="absolute-top"
   ></q-btn>
-  <q-card class="q-pa-md" style="min-width: 450px; max-width: 450px">
+  <q-card class="q-pa-md" style="min-width: 200px; max-width: 450px; width: 30vw;">
     <q-banner v-if="serverStore.isConnected" class="q-mb-md">
       <div class="text-h6">Connected to server: {{ serverStore.lastConnectedServerUrl }}</div>
       <q-btn
@@ -183,8 +183,9 @@ onMounted(() => {
       v-model="isExpanded"
       icon="list"
       label="List of servers"
+      class="full-width"
     >
-      <q-card-section>
+      <q-card-section class="q-gutter-y-md">
         <q-input
           v-model="newServerName"
           label="Name"
@@ -205,7 +206,7 @@ onMounted(() => {
           color="primary"
           label="Add server"
           @click="addServer"
-          class="q-mt-sm"
+          class="full-width"
           size="sm"
           :disabled="!newServerURL || !newServerName"
         />
@@ -215,29 +216,30 @@ onMounted(() => {
         <div class="text-grey">The list of servers is empty</div>
       </q-card-section>
 
-      <q-list v-else bordered>
+      <q-list v-else bordered class="full-width">
         <q-item
           v-for="([serverName, serverUrl]) in paginatedServers"
           :key="serverName"
           clickable
+          class="q-pa-sm"
         >
-          <q-item-section>
-            <div style="display: flex; align-items: center;">
+          <q-item-section class="col">
+            <div class="row items-center">
               <q-icon
                 :name="getStatusIcon(serverName)"
                 class="q-mr-sm"
-                style="flex-shrink: 0;"
+                size="sm"
                 :color="serverStatuses.get(serverName) ? 'positive' : 'negative'"
               />
-              <div v-if="editingIndex === serverName" style="flex-grow: 1;">
+              <div v-if="editingIndex === serverName" class="col q-gutter-y-sm">
                 <q-input
                   v-model="editedServerName"
                   dense
                   autofocus
                   label="Name"
-                  class="q-mb-sm"
                   :error="!!editedServerNameError"
                   :error-message="editedServerNameError"
+                  class="col"
                 />
                 <q-input
                   v-model="editedServerURL"
@@ -245,31 +247,40 @@ onMounted(() => {
                   label="URL"
                   :error="!!editedServerUrlError"
                   :error-message="editedServerUrlError"
+                  class="col"
                 />
               </div>
-              <q-item-label v-else class="flex-grow">
+              <q-item-label v-else class="col">
                 <div class="column">
-                  <div class="text-bold">{{ serverName }}</div>
-                  <div class="text-grey-7 text-caption">
-                    <a :href="serverUrl" target="_blank" rel="noopener noreferrer" class="text-grey-7">{{ serverUrl }}</a>
-                  </div>
+                  <div class="text-bold text-body1">{{ serverName }}</div>
+                  <a
+                    :href="serverUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-caption text-grey-7 text-underline"
+                  >
+                    {{ serverUrl }}
+                  </a>
                 </div>
               </q-item-label>
-
             </div>
           </q-item-section>
-          <q-item-section side>
-            <p v-if="!serverStatuses.get(serverName)" class="text-red">{{ updateServerErrorMessage }}</p>
+
+          <q-item-section side class="q-gutter-xs">
+            <p v-if="!serverStatuses.get(serverName)" class="text-red text-caption q-mb-none">
+              {{ updateServerErrorMessage }}
+            </p>
             <q-btn
               color="secondary"
               label="Connect"
               @click="serverStore.connectToServer(serverUrl)"
               size="sm"
-              class="q-ml-sm"
               :disable="!serverStatuses.get(serverName)"
+              class="full-width"
             />
           </q-item-section>
-          <q-item-section side>
+
+          <q-item-section side class="q-gutter-xs">
             <q-btn
               v-if="editingIndex === serverName"
               color="positive"
@@ -289,18 +300,19 @@ onMounted(() => {
               color="negative"
               icon="delete"
               @click="removeServer(serverName)"
-              class="q-ml-sm"
               size="sm"
             />
           </q-item-section>
         </q-item>
       </q-list>
+
       <q-pagination
         v-if="Object.keys(serverStore.serverHistory).length > itemsPerPage"
         v-model="currentPage"
         :max="maxPages"
         boundary-links
-        class="q-mt-md flex align-center"
+        class="q-mt-md"
+        input-class="text-primary"
       />
     </q-expansion-item>
   </q-card>
