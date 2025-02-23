@@ -158,7 +158,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-card class="q-pa-md" style="min-width: 200px; max-width: 450px; width: 30vw;">
+  <q-card class="q-pa-md" style="min-width: 200px; max-width: 450px; width: 100vw; overflow-wrap: break-word;">
     <q-banner v-if="serverStore.isConnected" class="q-mb-md">
       <div class="text-h6">Connected to server: {{ serverStore.lastConnectedServerUrl }}</div>
       <q-btn
@@ -251,15 +251,15 @@ onMounted(() => {
                   >
                     {{ serverUrl }}
                   </a>
+                  <p v-if="!serverStatuses.get(serverName)" class="text-red text-caption q-mb-none">
+                    {{ updateServerErrorMessage }}
+                  </p>
                 </div>
               </q-item-label>
             </div>
           </q-item-section>
 
           <q-item-section side class="q-gutter-xs">
-            <p v-if="!serverStatuses.get(serverName)" class="text-red text-caption q-mb-none">
-              {{ updateServerErrorMessage }}
-            </p>
             <q-btn
               color="secondary"
               label="Connect"
