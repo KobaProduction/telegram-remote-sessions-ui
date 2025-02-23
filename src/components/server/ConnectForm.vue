@@ -16,7 +16,7 @@ const connect = async (serverURL: string, rememberServer: boolean) => {
     const axiosError = e as AxiosError
     error.value = (axiosError.response?.data as {
       message?: string
-    })?.message || axiosError.message || 'Неизвестная ошибка'
+    })?.message || axiosError.message || 'Unknown error'
   }
 }
 
@@ -24,7 +24,7 @@ const connect = async (serverURL: string, rememberServer: boolean) => {
 
 <template>
   <div class="server-form">
-    <p>Введите сервер</p>
+    <p>Enter the server</p>
     <q-input
       v-model="serverURL"
       label="Server URL" outlined
@@ -32,8 +32,8 @@ const connect = async (serverURL: string, rememberServer: boolean) => {
       :error-message="error"
     />
     <div class="q-mt-sm">
-      <q-checkbox v-model="rememberServer" label="Запомнить сервер?" class="q-mr-lg" />
-      <q-btn @click="connect(serverURL, rememberServer)" color="primary" :disable="!serverURL" >Подключиться</q-btn>
+      <q-checkbox v-model="rememberServer" label="Remember server?" class="q-mr-lg" />
+      <q-btn @click="connect(serverURL, rememberServer)" color="primary" :disable="!serverURL" label="Connect"/>
     </div>
 
   </div>
