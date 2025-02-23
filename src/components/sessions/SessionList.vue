@@ -60,14 +60,7 @@ const closeSession = () => {
 </script>
 
 <template>
-  <div class="q-py-md" style="min-height: 550px">
-    <q-input
-      v-model="searchQuery"
-      label="Session name"
-      outlined
-      dense
-      class="q-mb-md"
-    />
+  <div class="q-py-md" style="min-width: 300px; min-height: 550px;">
     <q-select
       v-model="sessionsPerPage"
       :options="sessionsPerPageOptions"
